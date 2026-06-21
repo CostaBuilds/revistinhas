@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { BookOpen, ChevronDown, ChevronRight } from 'lucide-react'
 import { Comic, ownerLabels } from '@/types'
-import { getComics } from '@/lib/data'
+import { getComicsForUser } from '@/lib/data'
+import { useAuth } from '@/context/auth'
 import { cn, formatCurrency, ownerColor } from '@/lib/utils'
 import { conditionLabels } from '@/types'
 import { Input } from '@/components/ui/input'
@@ -20,12 +21,14 @@ interface SeriesData {
 }
 
 export default function SeriesPage() {
+  const { user }   = useAuth()
   const [series, setSeries] = useState<SeriesData[]>([])
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
   const [search, setSearch] = useState('')
 
   useEffect(() => {
-    getComics().then((comics) => {
+    if (!user) return
+    getComicsForUser(user).then((comics) => {
     const map = new Map<string, Comic[]>()
     comics.forEach((c) => {
       const key = c.series ?? `— ${c.title}`
@@ -41,7 +44,7 @@ export default function SeriesPage() {
     }))
     setSeries(list.sort((a, b) => b.comics.length - a.comics.length))
     })
-  }, [])
+  }, [user])
 
   function toggle(name: string) {
     setExpanded((prev) => {

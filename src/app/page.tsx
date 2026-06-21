@@ -10,7 +10,8 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import StatsCard from '@/components/StatsCard'
-import { getComics, getWishlist, getGoals, getEventos } from '@/lib/data'
+import { getComicsForUser, getWishlist, getGoals, getEventos } from '@/lib/data'
+import { useAuth } from '@/context/auth'
 import { Comic, WishlistItem, Goal, Evento } from '@/types'
 import { formatCurrency, ownerColor, cn } from '@/lib/utils'
 import Link from 'next/link'
@@ -636,25 +637,24 @@ function PublisherCollectionCard({ comics }: { comics: Comic[] }) {
 
 // ─── Main Dashboard ───────────────────────────────────────────────
 export default function DashboardPage() {
+  const { user }   = useAuth()
   const [comics,   setComics]   = useState<Comic[]>([])
   const [wishlist, setWishlist] = useState<WishlistItem[]>([])
   const [goals,    setGoals]    = useState<Goal[]>([])
   const [eventos,  setEventos]  = useState<Evento[]>([])
 
   useEffect(() => {
-    getComics().then(setComics)
-    getWishlist().then(setWishlist)
-    getGoals().then(setGoals)
+    if (!user) return
+    getComicsForUser(user).then(setComics)
+    getWishlist().then((all) => setWishlist(all.filter(w => w.owner === user || w.owner === 'ambos')))
+    getGoals().then((all)    => setGoals(all.filter(g => g.owner === user || g.owner === 'ambos')))
     getEventos().then(setEventos)
-  }, [])
+  }, [user])
 
-  const totalValue   = comics.reduce((s, c) => s + (c.current_value ?? 0), 0)
-  const totalPaid    = comics.reduce((s, c) => s + (c.purchase_price ?? 0), 0)
-  const gain         = totalValue - totalPaid
-  const gainPct      = totalPaid > 0 ? ((gain / totalPaid) * 100).toFixed(1) : '0'
-
-  const marceloCount = comics.filter(c => c.owner === 'marcelo' || c.owner === 'ambos').length
-  const walterCount  = comics.filter(c => c.owner === 'walter'  || c.owner === 'ambos').length
+  const totalValue = comics.reduce((s, c) => s + (c.current_value ?? 0), 0)
+  const totalPaid  = comics.reduce((s, c) => s + (c.purchase_price ?? 0), 0)
+  const gain       = totalValue - totalPaid
+  const gainPct    = totalPaid > 0 ? ((gain / totalPaid) * 100).toFixed(1) : '0'
 
   const recentComics = [...comics]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
@@ -667,8 +667,8 @@ export default function DashboardPage() {
       {/* Header */}
       <div>
         <h1 className="font-comic text-[1.8rem] leading-none uppercase tracking-[0.05em]">Dashboard</h1>
-        <p className="text-xs text-muted-foreground mt-1">
-          Coleção de Marcelo &amp; Walter · {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
+        <p className="text-xs text-muted-foreground mt-1 capitalize">
+          Coleção de {user} · {new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })}
         </p>
       </div>
 
@@ -677,10 +677,9 @@ export default function DashboardPage() {
         <StatsCard
           title="Quadrinhos"
           value={String(comics.length)}
-          subtitle={`${marceloCount} Marcelo · ${walterCount} Walter`}
+          subtitle="na minha coleção"
           icon={Library}
           accent="sky"
-          trend="+12%"
         />
         <StatsCard
           title="Valor total"

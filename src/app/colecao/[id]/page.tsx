@@ -49,17 +49,27 @@ export default function ComicDetailPage({ params }: { params: Promise<{ id: stri
 
   async function handleSave() {
     if (!id) return
-    await updateComic(id, form)
-    const comics = await getComics()
-    const updated = comics.find((c) => c.id === id)
-    if (updated) setComic(updated)
-    setEditing(false)
+    try {
+      await updateComic(id, form)
+      const comics = await getComics()
+      const updated = comics.find((c) => c.id === id)
+      if (updated) setComic(updated)
+      setEditing(false)
+    } catch (err) {
+      console.error('Erro ao salvar:', err)
+      alert('Erro: ' + (err as Error).message)
+    }
   }
 
   async function handleDelete() {
     if (!confirm('Remover este quadrinho?')) return
-    await deleteComic(id)
-    router.push('/colecao')
+    try {
+      await deleteComic(id)
+      router.push('/colecao')
+    } catch (err) {
+      console.error('Erro ao deletar:', err)
+      alert('Erro: ' + (err as Error).message)
+    }
   }
 
   if (!comic) return (

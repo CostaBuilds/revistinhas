@@ -43,15 +43,21 @@ function NovaColecaoForm() {
     e.preventDefault()
     if (!name.trim()) return
     setSaving(true)
-    await addCollection({
-      name:          name.trim(),
-      publisher:     publisher.trim() || null,
-      cover_url:     previewOk ? coverUrl.trim() : null,
-      total_volumes: parseInt(totalVolumes) || 1,
-      created_by:    (user as Owner) ?? 'marcelo',
-      description:   description.trim() || null,
-    })
-    router.push('/colecao')
+    try {
+      await addCollection({
+        name:          name.trim(),
+        publisher:     publisher.trim() || null,
+        cover_url:     previewOk ? coverUrl.trim() : null,
+        total_volumes: parseInt(totalVolumes) || 1,
+        created_by:    (user as Owner) ?? 'marcelo',
+        description:   description.trim() || null,
+      })
+      router.push('/colecao')
+    } catch (err) {
+      console.error('Erro ao criar coleção:', err)
+      setSaving(false)
+      alert('Erro ao salvar: ' + (err as Error).message)
+    }
   }
 
   return (

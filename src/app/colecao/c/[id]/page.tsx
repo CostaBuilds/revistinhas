@@ -68,27 +68,33 @@ function CopyModal({
 
   async function handleConfirm() {
     setSaving(true)
-    for (const vol of Array.from(checked).sort((a, b) => a - b)) {
-      if (!alreadyOwned.has(vol)) {
-        await addComic({
-          title:          `${collection.name} #${vol}`,
-          series:         collection.name,
-          issue_number:   vol,
-          volume:         null,
-          publisher:      collection.publisher,
-          year:           null,
-          condition:      null,
-          purchase_price: null,
-          current_value:  null,
-          owner:          targetOwner,
-          cover_url:      null,
-          notes:          null,
-          read:           false,
-          language:       'pt',
-        })
+    try {
+      for (const vol of Array.from(checked).sort((a, b) => a - b)) {
+        if (!alreadyOwned.has(vol)) {
+          await addComic({
+            title:          `${collection.name} #${vol}`,
+            series:         collection.name,
+            issue_number:   vol,
+            volume:         null,
+            publisher:      collection.publisher,
+            year:           null,
+            condition:      null,
+            purchase_price: null,
+            current_value:  null,
+            owner:          targetOwner,
+            cover_url:      null,
+            notes:          null,
+            read:           false,
+            language:       'pt',
+          })
+        }
       }
+      onClose()
+    } catch (err) {
+      console.error('Erro ao copiar volumes:', err)
+      setSaving(false)
+      alert('Erro: ' + (err as Error).message)
     }
-    onClose()
   }
 
   const vol = Array.from({ length: collection.total_volumes }, (_, i) => i + 1)
@@ -289,14 +295,24 @@ export default function CollectionDetailPage() {
 
   async function handleDelete() {
     if (!confirm(`Remover a coleção "${collection!.name}"? Os quadrinhos não serão apagados.`)) return
-    await deleteCollection(id)
-    router.push('/colecao')
+    try {
+      await deleteCollection(id)
+      router.push('/colecao')
+    } catch (err) {
+      console.error('Erro ao deletar coleção:', err)
+      alert('Erro: ' + (err as Error).message)
+    }
   }
 
   async function handleSaveCover(url: string) {
-    await updateCollection(id, { cover_url: url || null })
-    setCollection(prev => prev ? { ...prev, cover_url: url || null } : prev)
-    setShowEdit(false)
+    try {
+      await updateCollection(id, { cover_url: url || null })
+      setCollection(prev => prev ? { ...prev, cover_url: url || null } : prev)
+      setShowEdit(false)
+    } catch (err) {
+      console.error('Erro ao salvar capa:', err)
+      alert('Erro: ' + (err as Error).message)
+    }
   }
 
   const vol = Array.from({ length: collection.total_volumes }, (_, i) => i + 1)

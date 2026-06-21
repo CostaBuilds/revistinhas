@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { Plus, Search, LayoutGrid, List, BookOpen, Copy } from 'lucide-react'
 import { Comic, Collection, Owner } from '@/types'
-import { getComics, getCollections } from '@/lib/data'
+import { getComicsForUser, getCollections } from '@/lib/data'
+import { useAuth } from '@/context/auth'
 import { cn, formatCurrency, ownerColor } from '@/lib/utils'
 import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
@@ -32,6 +33,7 @@ function pubStyle(pub: string) { return PUB[pub] ?? PUB_DEFAULT }
 type Tab = 'colecoes' | 'hqs'
 
 export default function ColecaoPage() {
+  const { user }                    = useAuth()
   const [comics, setComics]         = useState<Comic[]>([])
   const [collections, setCollections] = useState<Collection[]>([])
   const [search, setSearch]         = useState('')
@@ -40,9 +42,10 @@ export default function ColecaoPage() {
   const [listView, setListView]     = useState(false)
 
   useEffect(() => {
-    getComics().then(setComics)
+    if (!user) return
+    getComicsForUser(user).then(setComics)
     getCollections().then(setCollections)
-  }, [])
+  }, [user])
 
   // ── Filtered collections ──────────────────────────────────────
   const filteredCols = collections.filter((col) => {

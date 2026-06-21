@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { Plus, Trash2, ShoppingCart } from 'lucide-react'
 import { WishlistItem, Priority, Owner, priorityLabels, ownerLabels } from '@/types'
 import { getWishlist, addWishlistItem, deleteWishlistItem, acquireWishlistItem } from '@/lib/data'
+import { useAuth } from '@/context/auth'
 import { cn, formatCurrency, ownerColor, priorityColor } from '@/lib/utils'
 import Modal from '@/components/Modal'
 import { Input, Select, Textarea } from '@/components/FormField'
@@ -26,12 +27,13 @@ const OWNER_OPTS = [
 ]
 
 export default function WishlistPage() {
+  const { user }   = useAuth()
   const [wishlist, setWishlist] = useState<WishlistItem[]>([])
   const [showModal, setShowModal] = useState(false)
   const [ownerFilter, setOwnerFilter] = useState<Owner | 'todos'>('todos')
   const [form, setForm] = useState({
     title: '', series: '', issue_number: '', volume: '', publisher: '',
-    priority: 'media' as Priority, owner: 'marcelo' as Owner,
+    priority: 'media' as Priority, owner: (user ?? 'marcelo') as Owner,
     estimated_price: '', notes: '',
   })
 
@@ -44,32 +46,37 @@ export default function WishlistPage() {
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault()
     if (!form.title.trim()) return
-    await addWishlistItem({
-      title: form.title.trim(),
-      series: form.series.trim() || null,
-      issue_number: form.issue_number ? parseInt(form.issue_number) : null,
-      volume: form.volume ? parseInt(form.volume) : null,
-      publisher: form.publisher.trim() || null,
-      priority: form.priority,
-      owner: form.owner,
-      estimated_price: form.estimated_price ? parseFloat(form.estimated_price.replace(',', '.')) : null,
-      notes: form.notes.trim() || null,
-    })
-    setForm({ title: '', series: '', issue_number: '', volume: '', publisher: '', priority: 'media', owner: 'marcelo', estimated_price: '', notes: '' })
-    setShowModal(false)
-    refresh()
+    try {
+      await addWishlistItem({
+        title: form.title.trim(),
+        series: form.series.trim() || null,
+        issue_number: form.issue_number ? parseInt(form.issue_number) : null,
+        volume: form.volume ? parseInt(form.volume) : null,
+        publisher: form.publisher.trim() || null,
+        priority: form.priority,
+        owner: form.owner,
+        estimated_price: form.estimated_price ? parseFloat(form.estimated_price.replace(',', '.')) : null,
+        notes: form.notes.trim() || null,
+      })
+      setForm({ title: '', series: '', issue_number: '', volume: '', publisher: '', priority: 'media', owner: 'marcelo', estimated_price: '', notes: '' })
+      setShowModal(false)
+      refresh()
+    } catch (err) {
+      console.error('Erro ao salvar wishlist:', err)
+      alert('Erro: ' + (err as Error).message)
+    }
   }
 
   async function handleDelete(id: string) {
     if (!confirm('Remover da wishlist?')) return
-    await deleteWishlistItem(id)
-    refresh()
+    try { await deleteWishlistItem(id); refresh() }
+    catch (err) { console.error(err) }
   }
 
   async function handleAcquire(id: string) {
     if (!confirm('Mover para a coleção?')) return
-    await acquireWishlistItem(id)
-    refresh()
+    try { await acquireWishlistItem(id); refresh() }
+    catch (err) { console.error(err) }
   }
 
   const filtered = wishlist.filter((w) => ownerFilter === 'todos' || w.owner === ownerFilter || w.owner === 'ambos')

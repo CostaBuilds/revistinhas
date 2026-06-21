@@ -61,23 +61,29 @@ function NovoComicForm() {
     e.preventDefault()
     if (!form.title.trim()) return
     setSaving(true)
-    await addComic({
-      title: form.title.trim(),
-      series: form.series.trim() || null,
-      issue_number: form.issue_number ? parseInt(form.issue_number) : null,
-      volume: form.volume ? parseInt(form.volume) : null,
-      publisher: form.publisher.trim() || null,
-      year: form.year ? parseInt(form.year) : null,
-      condition: (form.condition as Condition) || null,
-      purchase_price: form.purchase_price ? parseFloat(form.purchase_price.replace(',', '.')) : null,
-      current_value: form.current_value ? parseFloat(form.current_value.replace(',', '.')) : null,
-      owner: form.owner as Owner,
-      cover_url: form.cover_url.trim() || null,
-      notes: form.notes.trim() || null,
-      read: form.read,
-      language: form.language,
-    })
-    router.push('/colecao')
+    try {
+      await addComic({
+        title: form.title.trim(),
+        series: form.series.trim() || null,
+        issue_number: form.issue_number ? parseInt(form.issue_number) : null,
+        volume: form.volume ? parseInt(form.volume) : null,
+        publisher: form.publisher.trim() || null,
+        year: form.year ? parseInt(form.year) : null,
+        condition: (form.condition as Condition) || null,
+        purchase_price: form.purchase_price ? parseFloat(form.purchase_price.replace(',', '.')) : null,
+        current_value: form.current_value ? parseFloat(form.current_value.replace(',', '.')) : null,
+        owner: form.owner as Owner,
+        cover_url: form.cover_url.trim() || null,
+        notes: form.notes.trim() || null,
+        read: form.read,
+        language: form.language,
+      })
+      router.push('/colecao')
+    } catch (err) {
+      console.error('Erro ao salvar HQ:', err)
+      setSaving(false)
+      alert('Erro ao salvar: ' + (err as Error).message)
+    }
   }
 
   const fromSeries = !!params.get('series')

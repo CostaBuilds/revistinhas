@@ -43,35 +43,40 @@ export default function MetasPage() {
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault()
     if (!form.title.trim()) return
-    await addGoal({
-      title: form.title.trim(),
-      description: form.description.trim() || null,
-      type: form.type,
-      owner: form.owner,
-      target_date: form.target_date || null,
-      completed: false,
-      progress_current: form.progress_current ? parseFloat(form.progress_current) : null,
-      progress_target: form.progress_target ? parseFloat(form.progress_target) : null,
-    })
-    setForm({ title: '', description: '', type: 'outro', owner: 'ambos', target_date: '', progress_current: '', progress_target: '' })
-    setShowModal(false)
-    refresh()
+    try {
+      await addGoal({
+        title: form.title.trim(),
+        description: form.description.trim() || null,
+        type: form.type,
+        owner: form.owner,
+        target_date: form.target_date || null,
+        completed: false,
+        progress_current: form.progress_current ? parseFloat(form.progress_current) : null,
+        progress_target: form.progress_target ? parseFloat(form.progress_target) : null,
+      })
+      setForm({ title: '', description: '', type: 'outro', owner: 'ambos', target_date: '', progress_current: '', progress_target: '' })
+      setShowModal(false)
+      refresh()
+    } catch (err) {
+      console.error('Erro ao salvar meta:', err)
+      alert('Erro: ' + (err as Error).message)
+    }
   }
 
   async function handleToggle(goal: Goal) {
-    await updateGoal(goal.id, { completed: !goal.completed })
-    refresh()
+    try { await updateGoal(goal.id, { completed: !goal.completed }); refresh() }
+    catch (err) { console.error(err) }
   }
 
   async function handleDelete(id: string) {
     if (!confirm('Remover esta meta?')) return
-    await deleteGoal(id)
-    refresh()
+    try { await deleteGoal(id); refresh() }
+    catch (err) { console.error(err) }
   }
 
   async function handleSlider(id: string, value: number) {
-    await updateGoal(id, { progress_current: value })
-    refresh()
+    try { await updateGoal(id, { progress_current: value }); refresh() }
+    catch (err) { console.error(err) }
   }
 
   const filtered = goals.filter((g) =>
