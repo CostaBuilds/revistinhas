@@ -16,6 +16,7 @@ const nav = [
   { href: '/series',   label: 'Séries'    },
   { href: '/wishlist', label: 'Wishlist'  },
   { href: '/metas',    label: 'Metas'     },
+  { href: '/agenda',   label: 'Agenda'    },
 ]
 
 const USER_COLORS: Record<string, string> = {

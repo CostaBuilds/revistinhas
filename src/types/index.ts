@@ -101,7 +101,7 @@ export interface Collection {
   description: string | null
 }
 
-export type EventoTipo = 'lancamento' | 'pre_venda' | 'saldao'
+export type EventoTipo = 'lancamento' | 'pre_venda' | 'saldao' | 'evento' | 'feira' | 'sorteio'
 
 export interface Evento {
   id: string
@@ -109,10 +109,24 @@ export interface Evento {
   data: string  // YYYY-MM-DD
   tipo: EventoTipo
   descricao?: string | null
+  created_by: 'marcelo' | 'walter'
+  local?: string | null
 }
 
 export const eventoTipoLabel: Record<EventoTipo, string> = {
   lancamento: 'Lançamento',
-  pre_venda: 'Pré-venda',
-  saldao: 'Saldão',
+  pre_venda:  'Pré-venda',
+  saldao:     'Saldão',
+  evento:     'Evento',
+  feira:      'Feira',
+  sorteio:    'Sorteio',
+}
+
+export const eventoTipoCor: Record<EventoTipo, { bg: string; text: string }> = {
+  lancamento: { bg: '#EC1D24', text: '#fff' },
+  pre_venda:  { bg: '#0476F2', text: '#fff' },
+  saldao:     { bg: '#D97706', text: '#fff' },
+  evento:     { bg: '#7C3AED', text: '#fff' },
+  feira:      { bg: '#16A34A', text: '#fff' },
+  sorteio:    { bg: '#DB2777', text: '#fff' },
 }

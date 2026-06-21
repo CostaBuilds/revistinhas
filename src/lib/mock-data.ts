@@ -305,11 +305,11 @@ export const mockCollections: Collection[] = [
 ]
 
 export const mockEventos: Evento[] = [
-  { id: 'ev1', titulo: 'Watchmen #4 — Pré-venda', data: '2026-06-25', tipo: 'pre_venda', descricao: 'Completando a série' },
-  { id: 'ev2', titulo: 'Flash Sale FV Comics', data: '2026-06-28', tipo: 'saldao', descricao: '40% off em clássicos selecionados' },
-  { id: 'ev3', titulo: 'Sandman Vol. 4 (Panini)', data: '2026-07-05', tipo: 'lancamento', descricao: 'Edição nacional — A Estação das Névoas' },
-  { id: 'ev4', titulo: 'Saga #70 (Image Comics)', data: '2026-07-12', tipo: 'pre_venda', descricao: null },
-  { id: 'ev5', titulo: 'Saldão Anime Friends SP', data: '2026-07-20', tipo: 'saldao', descricao: 'São Paulo · Estande de quadrinhos' },
-  { id: 'ev6', titulo: 'X-Men #1 Facsimile (Marvel)', data: '2026-08-01', tipo: 'lancamento', descricao: null },
-  { id: 'ev7', titulo: 'CCXP Mini — Pipoca & Nanquim', data: '2026-08-10', tipo: 'saldao', descricao: 'São Paulo · ago/26' },
+  { id: 'ev1', titulo: 'Watchmen #4 — Pré-venda', data: '2026-06-25', tipo: 'pre_venda', descricao: 'Completando a série', created_by: 'marcelo' },
+  { id: 'ev2', titulo: 'Flash Sale FV Comics', data: '2026-06-28', tipo: 'saldao', descricao: '40% off em clássicos selecionados', created_by: 'walter' },
+  { id: 'ev3', titulo: 'Sandman Vol. 4 (Panini)', data: '2026-07-05', tipo: 'lancamento', descricao: 'Edição nacional — A Estação das Névoas', created_by: 'marcelo' },
+  { id: 'ev4', titulo: 'Saga #70 (Image Comics)', data: '2026-07-12', tipo: 'pre_venda', descricao: null, created_by: 'walter' },
+  { id: 'ev5', titulo: 'Saldão Anime Friends SP', data: '2026-07-20', tipo: 'saldao', descricao: 'São Paulo · Estande de quadrinhos', created_by: 'marcelo' },
+  { id: 'ev6', titulo: 'X-Men #1 Facsimile (Marvel)', data: '2026-08-01', tipo: 'lancamento', descricao: null, created_by: 'walter' },
+  { id: 'ev7', titulo: 'CCXP Mini — Pipoca & Nanquim', data: '2026-08-10', tipo: 'saldao', descricao: 'São Paulo · ago/26', created_by: 'marcelo' },
 ]

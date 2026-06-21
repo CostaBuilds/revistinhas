@@ -50,11 +50,13 @@ create table if not exists goals (
 );
 
 create table if not exists eventos (
-  id        uuid primary key default gen_random_uuid(),
-  titulo    text not null,
-  data      date not null,
-  tipo      text check (tipo in ('lancamento','pre_venda','saldao')),
-  descricao text
+  id         uuid primary key default gen_random_uuid(),
+  titulo     text not null,
+  data       date not null,
+  tipo       text check (tipo in ('lancamento','pre_venda','saldao','evento','feira','sorteio')),
+  descricao  text,
+  local      text,
+  created_by text not null default 'marcelo' check (created_by in ('marcelo','walter'))
 );
 
 create table if not exists collections (

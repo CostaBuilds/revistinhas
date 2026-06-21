@@ -67,9 +67,12 @@ function computeSagas(comics: Comic[], wishlist: WishlistItem[], goals: Goal[]):
 
 // ─── Event map ───────────────────────────────────────────────────
 const EV = {
-  lancamento: { bg: '#0476F2', light: '#EFF6FF', text: '#1E40AF', dot: 'bg-blue-500',   label: 'Lançamento', Icon: Package      },
-  pre_venda:  { bg: '#D97706', light: '#FFFBEB', text: '#92400E', dot: 'bg-amber-500',  label: 'Pré-venda',  Icon: ShoppingCart },
-  saldao:     { bg: '#7C3AED', light: '#F5F3FF', text: '#5B21B6', dot: 'bg-violet-500', label: 'Saldão',     Icon: Percent      },
+  lancamento: { bg: '#EC1D24', light: '#FEF2F2', text: '#991B1B', dot: 'bg-red-500',    label: 'Lançamento', Icon: Package      },
+  pre_venda:  { bg: '#0476F2', light: '#EFF6FF', text: '#1E40AF', dot: 'bg-blue-500',   label: 'Pré-venda',  Icon: ShoppingCart },
+  saldao:     { bg: '#D97706', light: '#FFFBEB', text: '#92400E', dot: 'bg-amber-500',  label: 'Saldão',     Icon: Percent      },
+  evento:     { bg: '#7C3AED', light: '#F5F3FF', text: '#5B21B6', dot: 'bg-violet-500', label: 'Evento',     Icon: CalendarDays },
+  feira:      { bg: '#16A34A', light: '#F0FDF4', text: '#14532D', dot: 'bg-green-500',  label: 'Feira',      Icon: Building2    },
+  sorteio:    { bg: '#DB2777', light: '#FDF2F8', text: '#831843', dot: 'bg-pink-500',   label: 'Sorteio',    Icon: BarChart3    },
 } as const
 
 // ─── Calendar helpers ─────────────────────────────────────────────
