@@ -284,7 +284,7 @@ export default function CollectionDetailPage() {
   const currentOwned = user === 'walter' ? walterOwned : marceloOwned
   const currentPct   = Math.min(100, collection.total_volumes > 0 ? (currentOwned.size / collection.total_volumes) * 100 : 0)
 
-  const canCopy      = user !== collection.created_by || collection.created_by === 'ambos'
+  const canCopy      = collection.created_by === 'ambos' || user !== collection.created_by
   const targetOwner  = (user as Owner) ?? 'marcelo'
 
   async function handleDelete() {
