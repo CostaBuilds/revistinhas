@@ -10,9 +10,9 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import StatsCard from '@/components/StatsCard'
-import { getComicsForUser, getWishlist, getGoals, getEventos } from '@/lib/data'
+import { getComicsForUser, getWishlist, getGoals, getEventos, getCollections } from '@/lib/data'
 import { useAuth } from '@/context/auth'
-import { Comic, WishlistItem, Goal, Evento } from '@/types'
+import { Comic, WishlistItem, Goal, Evento, Collection } from '@/types'
 import { formatCurrency, ownerColor, cn } from '@/lib/utils'
 import Link from 'next/link'
 import { Progress } from '@/components/ui/progress'
@@ -38,7 +38,7 @@ function pubStyle(pub: string) { return PUB[pub] ?? PUB_DEFAULT }
 // ─── Saga types + compute ─────────────────────────────────────────
 type SagaInfo = { name: string; owned: number; total: number; percent: number; publisher: string | null }
 
-function computeSagas(comics: Comic[], wishlist: WishlistItem[], goals: Goal[]): SagaInfo[] {
+function computeSagas(comics: Comic[], wishlist: WishlistItem[], goals: Goal[], collections: Collection[]): SagaInfo[] {
   const map = new Map<string, { count: number; pubs: Set<string> }>()
   for (const c of comics) {
     const k = c.series ?? c.title
@@ -53,10 +53,11 @@ function computeSagas(comics: Comic[], wishlist: WishlistItem[], goals: Goal[]):
     wlCount[k] = (wlCount[k] ?? 0) + 1
   }
   return Array.from(map.entries()).map(([name, data]) => {
-    const goal     = goals.find(g => g.type === 'serie' && g.title.toLowerCase().includes(name.toLowerCase()))
-    const owned    = goal?.progress_current ?? data.count
-    const rawTotal = goal?.progress_target ?? (data.count + (wlCount[name] ?? 0))
-    const total    = Math.max(owned, rawTotal || data.count)
+    const goal       = goals.find(g => g.type === 'serie' && g.title.toLowerCase().includes(name.toLowerCase()))
+    const collection = collections.find(c => c.name === name)
+    const owned      = goal?.progress_current ?? data.count
+    const rawTotal   = goal?.progress_target ?? collection?.total_volumes ?? (data.count + (wlCount[name] ?? 0))
+    const total      = Math.max(owned, rawTotal || data.count)
     return {
       name, owned, total,
       percent: Math.min(100, total > 0 ? (owned / total) * 100 : 100),
@@ -218,16 +219,16 @@ function FeaturedComicCard({ comic }: { comic: Comic | null }) {
       </div>
       {/* Content */}
       <div className="flex">
-        <div
-          className="w-20 shrink-0 flex flex-col items-center justify-center gap-2 border-r-2 border-foreground/40"
-          style={{ background: s.bg + '15', minHeight: 96 }}
-        >
-          <div
-            className="h-9 w-9 rounded-sm flex items-center justify-center border border-foreground/25"
-            style={{ background: s.bg + '30' }}
-          >
-            <s.Icon size={18} style={{ color: s.bg }} />
-          </div>
+        <div className="w-20 shrink-0 overflow-hidden border-r-2 border-foreground/40" style={{ minHeight: 96 }}>
+          {comic.cover_url ? (
+            <img src={comic.cover_url} alt={comic.title} className="w-full h-full object-cover" style={{ minHeight: 96 }} />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center" style={{ background: s.bg + '15', minHeight: 96 }}>
+              <div className="h-9 w-9 rounded-sm flex items-center justify-center border border-foreground/25" style={{ background: s.bg + '30' }}>
+                <s.Icon size={18} style={{ color: s.bg }} />
+              </div>
+            </div>
+          )}
         </div>
         <div className="flex-1 p-3 min-w-0">
           <p className="text-[10px] text-muted-foreground">{comic.series ?? 'Sem série'}</p>
@@ -554,12 +555,14 @@ function RecentComicsCard({ comics }: { comics: Comic[] }) {
                   href={`/colecao/${comic.id}`}
                   className="grid grid-cols-[auto_1fr_auto_auto] gap-3 px-4 py-2.5 hover:bg-muted/40 transition-colors items-center"
                 >
-                  <div
-                    className="h-7 w-7 rounded-sm flex items-center justify-center shrink-0 border border-foreground/20"
-                    style={{ background: s.bg + '20' }}
-                    title={comic.publisher ?? ''}
-                  >
-                    <s.Icon size={12} style={{ color: s.bg }} />
+                  <div className="h-9 w-7 rounded-sm overflow-hidden shrink-0 border border-foreground/20" style={{ background: s.bg + '20' }}>
+                    {comic.cover_url ? (
+                      <img src={comic.cover_url} alt={comic.title} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <s.Icon size={12} style={{ color: s.bg }} />
+                      </div>
+                    )}
                   </div>
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate">{comic.title}</p>
@@ -640,18 +643,20 @@ function PublisherCollectionCard({ comics }: { comics: Comic[] }) {
 
 // ─── Main Dashboard ───────────────────────────────────────────────
 export default function DashboardPage() {
-  const { user }   = useAuth()
-  const [comics,   setComics]   = useState<Comic[]>([])
-  const [wishlist, setWishlist] = useState<WishlistItem[]>([])
-  const [goals,    setGoals]    = useState<Goal[]>([])
-  const [eventos,  setEventos]  = useState<Evento[]>([])
+  const { user }       = useAuth()
+  const [comics,      setComics]      = useState<Comic[]>([])
+  const [wishlist,    setWishlist]    = useState<WishlistItem[]>([])
+  const [goals,       setGoals]       = useState<Goal[]>([])
+  const [eventos,     setEventos]     = useState<Evento[]>([])
+  const [collections, setCollections] = useState<Collection[]>([])
 
   useEffect(() => {
     if (!user) return
     getComicsForUser(user).then(setComics)
-    getWishlist().then((all) => setWishlist(all.filter(w => w.owner === user || w.owner === 'ambos')))
-    getGoals().then((all)    => setGoals(all.filter(g => g.owner === user || g.owner === 'ambos')))
+    getWishlist().then((all)     => setWishlist(all.filter(w => w.owner === user || w.owner === 'ambos')))
+    getGoals().then((all)        => setGoals(all.filter(g => g.owner === user || g.owner === 'ambos')))
     getEventos().then(setEventos)
+    getCollections().then(setCollections)
   }, [user])
 
   const totalValue = comics.reduce((s, c) => s + (c.current_value ?? 0), 0)
@@ -663,7 +668,7 @@ export default function DashboardPage() {
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 6)
 
-  const sagas = computeSagas(comics, wishlist, goals)
+  const sagas = computeSagas(comics, wishlist, goals, collections)
 
   return (
     <div className="space-y-4">

@@ -453,7 +453,7 @@ export default function CollectionDetailPage() {
                     <Link
                       href={comic ? `/colecao/${comic.id}` : `/colecao/novo?series=${encodeURIComponent(collection.name)}&issue=${n}&publisher=${encodeURIComponent(collection.publisher ?? '')}`}
                       className={cn(
-                        'aspect-[2/3] rounded-sm border-2 flex flex-col items-center justify-center gap-0.5 transition-all font-comic text-sm',
+                        'aspect-[2/3] rounded-sm border-2 flex flex-col items-center justify-center gap-0.5 transition-all font-comic text-sm overflow-hidden relative',
                         both  ? 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-[2px_2px_0px_#059669]'
                               : mHas ? 'border-red-400 bg-red-50 text-red-700 shadow-[2px_2px_0px_#DC2626]'
                               : wHas ? 'border-blue-400 bg-blue-50 text-blue-700 shadow-[2px_2px_0px_#2563EB]'
@@ -466,11 +466,27 @@ export default function CollectionDetailPage() {
                               : `Vol. ${n} — Nenhum tem · Clique para adicionar`
                       }
                     >
-                      <span className="tabular-nums text-[11px] leading-none">{n}</span>
-                      {(mHas || wHas) && (
-                        <span className="text-[8px] leading-none opacity-70">
-                          {both ? 'M+W' : mHas ? 'M' : 'W'}
-                        </span>
+                      {comic?.cover_url ? (
+                        <>
+                          <img src={comic.cover_url} alt={`Vol. ${n}`} className="absolute inset-0 w-full h-full object-cover" />
+                          {(mHas || wHas) && (
+                            <span
+                              className="absolute bottom-0 inset-x-0 text-center py-0.5 text-[7px] font-comic leading-none text-white"
+                              style={{ background: both ? 'rgba(5,150,105,0.88)' : mHas ? 'rgba(220,38,38,0.88)' : 'rgba(37,99,235,0.88)' }}
+                            >
+                              {both ? 'M+W' : mHas ? 'M' : 'W'}
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        <>
+                          <span className="tabular-nums text-[11px] leading-none">{n}</span>
+                          {(mHas || wHas) && (
+                            <span className="text-[8px] leading-none opacity-70">
+                              {both ? 'M+W' : mHas ? 'M' : 'W'}
+                            </span>
+                          )}
+                        </>
                       )}
                     </Link>
                   </div>
@@ -512,13 +528,16 @@ export default function CollectionDetailPage() {
                     href={`/colecao/${comic.id}`}
                     className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/40 transition-colors"
                   >
-                    <div
-                      className="h-7 w-7 rounded-sm flex items-center justify-center border border-foreground/20 shrink-0"
-                      style={{ background: s.bg + '20' }}
-                    >
-                      <span className="font-comic text-[11px]" style={{ color: s.bg }}>
-                        {comic.issue_number ?? comic.volume ?? '?'}
-                      </span>
+                    <div className="h-10 w-7 rounded-sm overflow-hidden border border-foreground/20 shrink-0" style={{ background: s.bg + '20' }}>
+                      {comic.cover_url ? (
+                        <img src={comic.cover_url} alt={comic.title} className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="font-comic text-[11px]" style={{ color: s.bg }}>
+                            {comic.issue_number ?? comic.volume ?? '?'}
+                          </span>
+                        </div>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{comic.title}</p>

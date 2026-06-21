@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { BookOpen, ChevronDown, ChevronRight } from 'lucide-react'
-import { Comic, ownerLabels } from '@/types'
-import { getComicsForUser } from '@/lib/data'
+import { Comic, Collection, ownerLabels } from '@/types'
+import { getComicsForUser, getCollections } from '@/lib/data'
 import { useAuth } from '@/context/auth'
 import { cn, formatCurrency, ownerColor } from '@/lib/utils'
 import { conditionLabels } from '@/types'
@@ -21,10 +21,15 @@ interface SeriesData {
 }
 
 export default function SeriesPage() {
-  const { user }   = useAuth()
-  const [series, setSeries] = useState<SeriesData[]>([])
-  const [expanded, setExpanded] = useState<Set<string>>(new Set())
-  const [search, setSearch] = useState('')
+  const { user }       = useAuth()
+  const [series,      setSeries]      = useState<SeriesData[]>([])
+  const [collections, setCollections] = useState<Collection[]>([])
+  const [expanded,    setExpanded]    = useState<Set<string>>(new Set())
+  const [search,      setSearch]      = useState('')
+
+  useEffect(() => {
+    getCollections().then(setCollections)
+  }, [])
 
   useEffect(() => {
     if (!user) return
@@ -75,12 +80,14 @@ export default function SeriesPage() {
       ) : (
         <div className="rounded-lg border border-border/60 overflow-hidden divide-y divide-border/60">
           {filtered.map((s) => {
-            const isOpen = expanded.has(s.name)
-            const issues = s.comics.map((c) => c.issue_number).filter(Boolean) as number[]
-            const maxIssue = issues.length > 0 ? Math.max(...issues) : 0
-            const pct = maxIssue > 0 ? Math.round((issues.length / maxIssue) * 100) : 100
-            const missing = maxIssue > 0
-              ? Array.from({ length: maxIssue }, (_, i) => i + 1).filter((n) => !issues.includes(n))
+            const isOpen     = expanded.has(s.name)
+            const issues     = s.comics.map((c) => c.issue_number).filter(Boolean) as number[]
+            const maxIssue   = issues.length > 0 ? Math.max(...issues) : 0
+            const collection = collections.find(c => c.name === s.name)
+            const totalVols  = collection?.total_volumes ?? maxIssue
+            const pct        = totalVols > 0 ? Math.round((s.comics.length / totalVols) * 100) : 100
+            const missing    = totalVols > 0
+              ? Array.from({ length: totalVols }, (_, i) => i + 1).filter((n) => !issues.includes(n))
               : []
 
             return (
@@ -104,12 +111,14 @@ export default function SeriesPage() {
                     </div>
 
                     <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                      <span>{s.comics.length} exemplar{s.comics.length !== 1 ? 'es' : ''}</span>
+                      <span>
+                        {s.comics.length}{totalVols > 0 ? `/${totalVols}` : ''} exemplar{s.comics.length !== 1 ? 'es' : ''}
+                      </span>
                       {s.publishers[0] && <span>{s.publishers[0]}</span>}
                       <span className="ml-auto">{formatCurrency(s.totalValue)}</span>
                     </div>
 
-                    {maxIssue > 0 && (
+                    {totalVols > 0 && (
                       <div className="mt-2 flex items-center gap-2">
                         <Progress value={pct} className="h-1 flex-1" />
                         <span className="text-xs text-muted-foreground tabular-nums">{pct}%</span>
