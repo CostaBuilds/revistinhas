@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Sparkles, Bell, LogOut, Menu, Search } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
@@ -24,22 +24,37 @@ const USER_COLORS: Record<string, string> = {
 }
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
-  const pathname          = usePathname()
-  const { user, logout }  = useAuth()
+  const pathname               = usePathname()
+  const router                 = useRouter()
+  const { user, loading, logout } = useAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [eventCount, setEventCount] = useState(0)
 
   useEffect(() => {
-    const today = new Date()
-    const count = getEventos().filter(e => new Date(e.data + 'T00:00:00') >= today).length
-    setEventCount(count)
+    getEventos().then((evs) => {
+      const today = new Date()
+      setEventCount(evs.filter(e => new Date(e.data + 'T00:00:00') >= today).length)
+    })
   }, [])
+
+  useEffect(() => {
+    if (!loading && !user && pathname !== '/login') {
+      router.replace('/login')
+    }
+  }, [loading, user, pathname, router])
 
   if (pathname === '/login') return <>{children}</>
 
-  function handleLogout() {
-    logout()
-    window.location.href = '/login'
+  if (loading || !user) return (
+    <div className="flex items-center justify-center h-screen bg-background">
+      <div className="font-comic text-xs uppercase tracking-widest text-muted-foreground animate-pulse">
+        Carregando…
+      </div>
+    </div>
+  )
+
+  async function handleLogout() {
+    await logout()
   }
 
   const userColor = user ? (USER_COLORS[user] ?? '#888') : '#888'

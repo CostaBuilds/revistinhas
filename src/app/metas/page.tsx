@@ -34,16 +34,16 @@ export default function MetasPage() {
     target_date: '', progress_current: '', progress_target: '',
   })
 
-  useEffect(() => { setGoals(getGoals()) }, [])
+  useEffect(() => { getGoals().then(setGoals) }, [])
 
-  function refresh() { setGoals(getGoals()) }
+  function refresh() { getGoals().then(setGoals) }
 
   function setF(key: string, value: string) { setForm((f) => ({ ...f, [key]: value })) }
 
-  function handleAdd(e: React.FormEvent) {
+  async function handleAdd(e: React.FormEvent) {
     e.preventDefault()
     if (!form.title.trim()) return
-    addGoal({
+    await addGoal({
       title: form.title.trim(),
       description: form.description.trim() || null,
       type: form.type,
@@ -58,19 +58,19 @@ export default function MetasPage() {
     refresh()
   }
 
-  function handleToggle(goal: Goal) {
-    updateGoal(goal.id, { completed: !goal.completed })
+  async function handleToggle(goal: Goal) {
+    await updateGoal(goal.id, { completed: !goal.completed })
     refresh()
   }
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
     if (!confirm('Remover esta meta?')) return
-    deleteGoal(id)
+    await deleteGoal(id)
     refresh()
   }
 
-  function handleSlider(id: string, value: number) {
-    updateGoal(id, { progress_current: value })
+  async function handleSlider(id: string, value: number) {
+    await updateGoal(id, { progress_current: value })
     refresh()
   }
 

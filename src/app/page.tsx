@@ -642,10 +642,10 @@ export default function DashboardPage() {
   const [eventos,  setEventos]  = useState<Evento[]>([])
 
   useEffect(() => {
-    setComics(getComics())
-    setWishlist(getWishlist())
-    setGoals(getGoals())
-    setEventos(getEventos())
+    getComics().then(setComics)
+    getWishlist().then(setWishlist)
+    getGoals().then(setGoals)
+    getEventos().then(setEventos)
   }, [])
 
   const totalValue   = comics.reduce((s, c) => s + (c.current_value ?? 0), 0)

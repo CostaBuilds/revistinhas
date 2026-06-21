@@ -35,16 +35,16 @@ export default function WishlistPage() {
     estimated_price: '', notes: '',
   })
 
-  useEffect(() => { setWishlist(getWishlist()) }, [])
+  useEffect(() => { getWishlist().then(setWishlist) }, [])
 
-  function refresh() { setWishlist(getWishlist()) }
+  function refresh() { getWishlist().then(setWishlist) }
 
   function setF(key: string, value: string) { setForm((f) => ({ ...f, [key]: value })) }
 
-  function handleAdd(e: React.FormEvent) {
+  async function handleAdd(e: React.FormEvent) {
     e.preventDefault()
     if (!form.title.trim()) return
-    addWishlistItem({
+    await addWishlistItem({
       title: form.title.trim(),
       series: form.series.trim() || null,
       issue_number: form.issue_number ? parseInt(form.issue_number) : null,
@@ -60,15 +60,15 @@ export default function WishlistPage() {
     refresh()
   }
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
     if (!confirm('Remover da wishlist?')) return
-    deleteWishlistItem(id)
+    await deleteWishlistItem(id)
     refresh()
   }
 
-  function handleAcquire(id: string) {
+  async function handleAcquire(id: string) {
     if (!confirm('Mover para a coleção?')) return
-    acquireWishlistItem(id)
+    await acquireWishlistItem(id)
     refresh()
   }
 

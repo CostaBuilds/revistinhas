@@ -57,11 +57,11 @@ function NovoComicForm() {
     setForm((f) => ({ ...f, [key]: value }))
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!form.title.trim()) return
     setSaving(true)
-    addComic({
+    await addComic({
       title: form.title.trim(),
       series: form.series.trim() || null,
       issue_number: form.issue_number ? parseInt(form.issue_number) : null,

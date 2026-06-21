@@ -66,11 +66,11 @@ function CopyModal({
     setChecked(all)
   }
 
-  function handleConfirm() {
+  async function handleConfirm() {
     setSaving(true)
     for (const vol of Array.from(checked).sort((a, b) => a - b)) {
       if (!alreadyOwned.has(vol)) {
-        addComic({
+        await addComic({
           title:          `${collection.name} #${vol}`,
           series:         collection.name,
           issue_number:   vol,
@@ -264,9 +264,8 @@ export default function CollectionDetailPage() {
   const [showEdit,   setShowEdit]   = useState(false)
 
   useEffect(() => {
-    const cols = getCollections()
-    setCollection(cols.find((c) => c.id === id) ?? null)
-    setComics(getComics())
+    getCollections().then((cols) => setCollection(cols.find((c) => c.id === id) ?? null))
+    getComics().then(setComics)
   }, [id])
 
   if (!collection) return (
@@ -288,14 +287,14 @@ export default function CollectionDetailPage() {
   const canCopy      = user !== collection.created_by || collection.created_by === 'ambos'
   const targetOwner  = (user as Owner) ?? 'marcelo'
 
-  function handleDelete() {
+  async function handleDelete() {
     if (!confirm(`Remover a coleção "${collection!.name}"? Os quadrinhos não serão apagados.`)) return
-    deleteCollection(id)
+    await deleteCollection(id)
     router.push('/colecao')
   }
 
-  function handleSaveCover(url: string) {
-    updateCollection(id, { cover_url: url || null })
+  async function handleSaveCover(url: string) {
+    await updateCollection(id, { cover_url: url || null })
     setCollection(prev => prev ? { ...prev, cover_url: url || null } : prev)
     setShowEdit(false)
   }
@@ -531,7 +530,7 @@ export default function CollectionDetailPage() {
           targetOwner={targetOwner}
           onClose={() => {
             setShowCopy(false)
-            setComics(getComics())
+            getComics().then(setComics)
           }}
         />
       )}

@@ -1,43 +1,59 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
+import { supabase } from '@/lib/supabase'
 
 export type AuthUser = 'marcelo' | 'walter'
 
 interface AuthContextValue {
   user: AuthUser | null
   loading: boolean
-  login: (user: AuthUser) => void
-  logout: () => void
+  login: (user: AuthUser, password: string) => Promise<string | null>
+  logout: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue>({
   user: null,
   loading: true,
-  login: () => {},
-  logout: () => {},
+  login: async () => null,
+  logout: async () => {},
 })
 
-const STORAGE_KEY = 'revistinhas_user'
+function emailToUser(email: string | undefined): AuthUser | null {
+  const prefix = email?.split('@')[0]
+  if (prefix === 'marcelo' || prefix === 'walter') return prefix
+  return null
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null)
+  const [user, setUser]       = useState<AuthUser | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as AuthUser | null
-    if (stored === 'marcelo' || stored === 'walter') setUser(stored)
-    setLoading(false)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(emailToUser(session?.user.email))
+      setLoading(false)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUser(emailToUser(session?.user.email))
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
 
-  function login(u: AuthUser) {
-    localStorage.setItem(STORAGE_KEY, u)
-    setUser(u)
+  async function login(u: AuthUser, password: string): Promise<string | null> {
+    const { error } = await supabase.auth.signInWithPassword({
+      email: `${u}@revistinhas.app`,
+      password,
+    })
+    if (error) return 'Senha incorreta'
+    return null
   }
 
-  function logout() {
-    localStorage.removeItem(STORAGE_KEY)
-    setUser(null)
+  async function logout() {
+    await supabase.auth.signOut()
+    window.location.href = '/login'
   }
 
   return (

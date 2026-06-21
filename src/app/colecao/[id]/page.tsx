@@ -35,9 +35,10 @@ export default function ComicDetailPage({ params }: { params: Promise<{ id: stri
   const [id, setId] = useState('')
 
   useEffect(() => {
-    params.then(({ id }) => {
+    params.then(async ({ id }) => {
       setId(id)
-      const found = getComics().find((c) => c.id === id)
+      const comics = await getComics()
+      const found = comics.find((c) => c.id === id)
       if (found) { setComic(found); setForm(found) }
     })
   }, [params])
@@ -46,17 +47,18 @@ export default function ComicDetailPage({ params }: { params: Promise<{ id: stri
     setForm((f) => ({ ...f, [key]: value }))
   }
 
-  function handleSave() {
+  async function handleSave() {
     if (!id) return
-    updateComic(id, form)
-    const updated = getComics().find((c) => c.id === id)
+    await updateComic(id, form)
+    const comics = await getComics()
+    const updated = comics.find((c) => c.id === id)
     if (updated) setComic(updated)
     setEditing(false)
   }
 
-  function handleDelete() {
+  async function handleDelete() {
     if (!confirm('Remover este quadrinho?')) return
-    deleteComic(id)
+    await deleteComic(id)
     router.push('/colecao')
   }
 

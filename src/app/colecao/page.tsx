@@ -40,8 +40,8 @@ export default function ColecaoPage() {
   const [listView, setListView]     = useState(false)
 
   useEffect(() => {
-    setComics(getComics())
-    setCollections(getCollections())
+    getComics().then(setComics)
+    getCollections().then(setCollections)
   }, [])
 
   // ── Filtered collections ──────────────────────────────────────

@@ -25,7 +25,7 @@ export default function SeriesPage() {
   const [search, setSearch] = useState('')
 
   useEffect(() => {
-    const comics = getComics()
+    getComics().then((comics) => {
     const map = new Map<string, Comic[]>()
     comics.forEach((c) => {
       const key = c.series ?? `— ${c.title}`
@@ -40,6 +40,7 @@ export default function SeriesPage() {
       owners: [...new Set(items.map((c) => c.owner))],
     }))
     setSeries(list.sort((a, b) => b.comics.length - a.comics.length))
+    })
   }, [])
 
   function toggle(name: string) {

@@ -1,60 +1,83 @@
--- Execute este SQL no Supabase SQL Editor para criar as tabelas
+-- ══════════════════════════════════════════════════
+--  Revistinhas — Schema Supabase
+--  Cole este SQL no SQL Editor do Supabase
+-- ══════════════════════════════════════════════════
 
 create table if not exists comics (
-  id uuid default gen_random_uuid() primary key,
-  created_at timestamp with time zone default now(),
-  title text not null,
-  series text,
-  issue_number integer,
-  volume integer,
-  publisher text,
-  year integer,
-  condition text check (condition in ('mint','near_mint','very_fine','fine','very_good','good','fair','poor')),
-  purchase_price decimal(10,2),
-  current_value decimal(10,2),
-  owner text check (owner in ('marcelo','walter','ambos')) not null default 'marcelo',
-  cover_url text,
-  notes text,
-  read boolean not null default false,
-  language text not null default 'pt'
+  id            uuid primary key default gen_random_uuid(),
+  created_at    timestamptz default now() not null,
+  title         text not null,
+  series        text,
+  issue_number  int,
+  volume        int,
+  publisher     text,
+  year          int,
+  condition     text check (condition in ('mint','near_mint','very_fine','fine','very_good','good','fair','poor')),
+  purchase_price numeric(10,2),
+  current_value  numeric(10,2),
+  owner         text not null check (owner in ('marcelo','walter','ambos')),
+  cover_url     text,
+  notes         text,
+  read          boolean default false,
+  language      text default 'pt'
 );
 
-create table if not exists wishlist (
-  id uuid default gen_random_uuid() primary key,
-  created_at timestamp with time zone default now(),
-  title text not null,
-  series text,
-  issue_number integer,
-  volume integer,
-  publisher text,
-  priority text check (priority in ('alta','media','baixa')) not null default 'media',
-  notes text,
-  owner text check (owner in ('marcelo','walter','ambos')) not null default 'marcelo',
-  estimated_price decimal(10,2)
+create table if not exists wishlist_items (
+  id             uuid primary key default gen_random_uuid(),
+  created_at     timestamptz default now() not null,
+  title          text not null,
+  series         text,
+  issue_number   int,
+  volume         int,
+  publisher      text,
+  priority       text check (priority in ('alta','media','baixa')),
+  notes          text,
+  owner          text not null check (owner in ('marcelo','walter','ambos')),
+  estimated_price numeric(10,2)
 );
 
 create table if not exists goals (
-  id uuid default gen_random_uuid() primary key,
-  created_at timestamp with time zone default now(),
-  title text not null,
-  description text,
-  target_date date,
-  completed boolean not null default false,
-  owner text check (owner in ('marcelo','walter','ambos')) not null default 'ambos',
-  type text check (type in ('serie','quantidade','valor','outro')) not null default 'outro',
-  progress_current decimal(10,2),
-  progress_target decimal(10,2)
+  id               uuid primary key default gen_random_uuid(),
+  created_at       timestamptz default now() not null,
+  title            text not null,
+  description      text,
+  target_date      date,
+  completed        boolean default false,
+  owner            text not null check (owner in ('marcelo','walter','ambos')),
+  type             text check (type in ('serie','quantidade','valor','outro')),
+  progress_current int default 0,
+  progress_target  int default 0
 );
 
--- Habilitar Row Level Security (opcional, mas recomendado)
-alter table comics enable row level security;
-alter table wishlist enable row level security;
-alter table goals enable row level security;
+create table if not exists eventos (
+  id        uuid primary key default gen_random_uuid(),
+  titulo    text not null,
+  data      date not null,
+  tipo      text check (tipo in ('lancamento','pre_venda','saldao')),
+  descricao text
+);
 
--- Política pública (sem autenticação — acesso livre)
-create policy "public read" on comics for select using (true);
-create policy "public write" on comics for all using (true);
-create policy "public read" on wishlist for select using (true);
-create policy "public write" on wishlist for all using (true);
-create policy "public read" on goals for select using (true);
-create policy "public write" on goals for all using (true);
+create table if not exists collections (
+  id            uuid primary key default gen_random_uuid(),
+  created_at    timestamptz default now() not null,
+  name          text not null,
+  publisher     text,
+  cover_url     text,
+  total_volumes int default 1 not null,
+  created_by    text not null check (created_by in ('marcelo','walter','ambos')),
+  description   text
+);
+
+-- ── Desabilitar RLS (app pessoal, 2 usuários) ─────────────────────
+alter table comics          disable row level security;
+alter table wishlist_items  disable row level security;
+alter table goals           disable row level security;
+alter table eventos         disable row level security;
+alter table collections     disable row level security;
+
+-- ══════════════════════════════════════════════════
+--  Usuários de autenticação (fazer no dashboard):
+--  Authentication → Users → Add user
+--    Email: marcelo@revistinhas.app  Senha: (escolha)
+--    Email: walter@revistinhas.app   Senha: (escolha)
+-- ══════════════════════════════════════════════════

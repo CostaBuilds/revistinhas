@@ -1,186 +1,125 @@
 'use client'
 
+import { supabase } from './supabase'
 import { Comic, WishlistItem, Goal, Evento, Collection } from '@/types'
-import { mockComics, mockWishlist, mockGoals, mockEventos, mockCollections } from './mock-data'
 
-const STORAGE_KEYS = {
-  comics: 'revistinhas_comics',
-  wishlist: 'revistinhas_wishlist',
-  goals: 'revistinhas_goals',
-  eventos: 'revistinhas_eventos',
-  collections: 'revistinhas_collections',
+// ─── Comics ──────────────────────────────────────────────────────
+export async function getComics(): Promise<Comic[]> {
+  const { data } = await supabase.from('comics').select('*').order('created_at', { ascending: false })
+  return (data ?? []) as Comic[]
 }
 
-function load<T>(key: string, fallback: T[]): T[] {
-  if (typeof window === 'undefined') return fallback
-  try {
-    const raw = localStorage.getItem(key)
-    if (!raw) return fallback
-    return JSON.parse(raw) as T[]
-  } catch {
-    return fallback
-  }
+export async function getComicsForUser(user: 'marcelo' | 'walter'): Promise<Comic[]> {
+  const { data } = await supabase
+    .from('comics').select('*')
+    .in('owner', [user, 'ambos'])
+    .order('created_at', { ascending: false })
+  return (data ?? []) as Comic[]
 }
 
-function save<T>(key: string, data: T[]): void {
-  if (typeof window === 'undefined') return
-  localStorage.setItem(key, JSON.stringify(data))
+export async function addComic(comic: Omit<Comic, 'id' | 'created_at'>): Promise<Comic> {
+  const { data, error } = await supabase.from('comics').insert(comic).select().single()
+  if (error) throw error
+  return data as Comic
 }
 
-export function getComics(): Comic[] {
-  return load<Comic>(STORAGE_KEYS.comics, mockComics)
+export async function updateComic(id: string, updates: Partial<Comic>): Promise<void> {
+  const { error } = await supabase.from('comics').update(updates).eq('id', id)
+  if (error) throw error
 }
 
-export function saveComics(comics: Comic[]): void {
-  save(STORAGE_KEYS.comics, comics)
+export async function deleteComic(id: string): Promise<void> {
+  const { error } = await supabase.from('comics').delete().eq('id', id)
+  if (error) throw error
 }
 
-export function addComic(comic: Omit<Comic, 'id' | 'created_at'>): Comic {
-  const comics = getComics()
-  const newComic: Comic = {
-    ...comic,
-    id: crypto.randomUUID(),
-    created_at: new Date().toISOString(),
-  }
-  saveComics([...comics, newComic])
-  return newComic
+// ─── Wishlist ─────────────────────────────────────────────────────
+export async function getWishlist(): Promise<WishlistItem[]> {
+  const { data } = await supabase.from('wishlist_items').select('*').order('created_at', { ascending: false })
+  return (data ?? []) as WishlistItem[]
 }
 
-export function updateComic(id: string, data: Partial<Comic>): void {
-  const comics = getComics()
-  const updated = comics.map((c) => (c.id === id ? { ...c, ...data } : c))
-  saveComics(updated)
+export async function addWishlistItem(item: Omit<WishlistItem, 'id' | 'created_at'>): Promise<WishlistItem> {
+  const { data, error } = await supabase.from('wishlist_items').insert(item).select().single()
+  if (error) throw error
+  return data as WishlistItem
 }
 
-export function deleteComic(id: string): void {
-  const comics = getComics()
-  saveComics(comics.filter((c) => c.id !== id))
+export async function deleteWishlistItem(id: string): Promise<void> {
+  const { error } = await supabase.from('wishlist_items').delete().eq('id', id)
+  if (error) throw error
 }
 
-export function getWishlist(): WishlistItem[] {
-  return load<WishlistItem>(STORAGE_KEYS.wishlist, mockWishlist)
-}
-
-export function saveWishlist(wishlist: WishlistItem[]): void {
-  save(STORAGE_KEYS.wishlist, wishlist)
-}
-
-export function addWishlistItem(
-  item: Omit<WishlistItem, 'id' | 'created_at'>
-): WishlistItem {
-  const wishlist = getWishlist()
-  const newItem: WishlistItem = {
-    ...item,
-    id: crypto.randomUUID(),
-    created_at: new Date().toISOString(),
-  }
-  saveWishlist([...wishlist, newItem])
-  return newItem
-}
-
-export function deleteWishlistItem(id: string): void {
-  const wishlist = getWishlist()
-  saveWishlist(wishlist.filter((w) => w.id !== id))
-}
-
-export function acquireWishlistItem(id: string): void {
-  const wishlist = getWishlist()
-  const item = wishlist.find((w) => w.id === id)
+export async function acquireWishlistItem(id: string): Promise<void> {
+  const { data: item } = await supabase.from('wishlist_items').select('*').eq('id', id).single()
   if (!item) return
-
-  addComic({
-    title: item.title,
-    series: item.series,
-    issue_number: item.issue_number,
-    volume: item.volume,
-    publisher: item.publisher,
-    year: null,
-    condition: null,
-    purchase_price: item.estimated_price,
-    current_value: item.estimated_price,
-    owner: item.owner,
-    cover_url: null,
-    notes: item.notes,
-    read: false,
-    language: 'pt',
+  await addComic({
+    title: item.title, series: item.series,
+    issue_number: item.issue_number, volume: item.volume,
+    publisher: item.publisher, year: null, condition: null,
+    purchase_price: item.estimated_price, current_value: item.estimated_price,
+    owner: item.owner, cover_url: null, notes: item.notes, read: false, language: 'pt',
   })
-
-  deleteWishlistItem(id)
+  await deleteWishlistItem(id)
 }
 
-export function getGoals(): Goal[] {
-  return load<Goal>(STORAGE_KEYS.goals, mockGoals)
+// ─── Goals ───────────────────────────────────────────────────────
+export async function getGoals(): Promise<Goal[]> {
+  const { data } = await supabase.from('goals').select('*').order('created_at', { ascending: false })
+  return (data ?? []) as Goal[]
 }
 
-export function saveGoals(goals: Goal[]): void {
-  save(STORAGE_KEYS.goals, goals)
+export async function addGoal(goal: Omit<Goal, 'id' | 'created_at'>): Promise<Goal> {
+  const { data, error } = await supabase.from('goals').insert(goal).select().single()
+  if (error) throw error
+  return data as Goal
 }
 
-export function addGoal(goal: Omit<Goal, 'id' | 'created_at'>): Goal {
-  const goals = getGoals()
-  const newGoal: Goal = {
-    ...goal,
-    id: crypto.randomUUID(),
-    created_at: new Date().toISOString(),
-  }
-  saveGoals([...goals, newGoal])
-  return newGoal
+export async function updateGoal(id: string, updates: Partial<Goal>): Promise<void> {
+  const { error } = await supabase.from('goals').update(updates).eq('id', id)
+  if (error) throw error
 }
 
-export function updateGoal(id: string, data: Partial<Goal>): void {
-  const goals = getGoals()
-  const updated = goals.map((g) => (g.id === id ? { ...g, ...data } : g))
-  saveGoals(updated)
+export async function deleteGoal(id: string): Promise<void> {
+  const { error } = await supabase.from('goals').delete().eq('id', id)
+  if (error) throw error
 }
 
-export function deleteGoal(id: string): void {
-  const goals = getGoals()
-  saveGoals(goals.filter((g) => g.id !== id))
+// ─── Eventos ─────────────────────────────────────────────────────
+export async function getEventos(): Promise<Evento[]> {
+  const { data } = await supabase.from('eventos').select('*').order('data', { ascending: true })
+  return (data ?? []) as Evento[]
 }
 
-export function getEventos(): Evento[] {
-  return load<Evento>(STORAGE_KEYS.eventos, mockEventos)
+export async function addEvento(evento: Omit<Evento, 'id'>): Promise<Evento> {
+  const { data, error } = await supabase.from('eventos').insert(evento).select().single()
+  if (error) throw error
+  return data as Evento
 }
 
-export function saveEventos(eventos: Evento[]): void {
-  save(STORAGE_KEYS.eventos, eventos)
+export async function deleteEvento(id: string): Promise<void> {
+  const { error } = await supabase.from('eventos').delete().eq('id', id)
+  if (error) throw error
 }
 
-export function addEvento(evento: Omit<Evento, 'id'>): Evento {
-  const eventos = getEventos()
-  const newEvento: Evento = { ...evento, id: crypto.randomUUID() }
-  saveEventos([...eventos, newEvento])
-  return newEvento
+// ─── Collections ─────────────────────────────────────────────────
+export async function getCollections(): Promise<Collection[]> {
+  const { data } = await supabase.from('collections').select('*').order('created_at', { ascending: false })
+  return (data ?? []) as Collection[]
 }
 
-export function deleteEvento(id: string): void {
-  saveEventos(getEventos().filter((e) => e.id !== id))
+export async function addCollection(col: Omit<Collection, 'id' | 'created_at'>): Promise<Collection> {
+  const { data, error } = await supabase.from('collections').insert(col).select().single()
+  if (error) throw error
+  return data as Collection
 }
 
-export function getCollections(): Collection[] {
-  return load<Collection>(STORAGE_KEYS.collections, mockCollections)
+export async function updateCollection(id: string, updates: Partial<Collection>): Promise<void> {
+  const { error } = await supabase.from('collections').update(updates).eq('id', id)
+  if (error) throw error
 }
 
-export function saveCollections(collections: Collection[]): void {
-  save(STORAGE_KEYS.collections, collections)
-}
-
-export function addCollection(col: Omit<Collection, 'id' | 'created_at'>): Collection {
-  const collections = getCollections()
-  const newCol: Collection = {
-    ...col,
-    id: crypto.randomUUID(),
-    created_at: new Date().toISOString(),
-  }
-  saveCollections([...collections, newCol])
-  return newCol
-}
-
-export function updateCollection(id: string, data: Partial<Collection>): void {
-  const collections = getCollections()
-  saveCollections(collections.map((c) => (c.id === id ? { ...c, ...data } : c)))
-}
-
-export function deleteCollection(id: string): void {
-  saveCollections(getCollections().filter((c) => c.id !== id))
+export async function deleteCollection(id: string): Promise<void> {
+  const { error } = await supabase.from('collections').delete().eq('id', id)
+  if (error) throw error
 }

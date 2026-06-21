@@ -39,11 +39,11 @@ function NovaColecaoForm() {
     img.src = coverUrl
   }, [coverUrl])
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!name.trim()) return
     setSaving(true)
-    addCollection({
+    await addCollection({
       name:          name.trim(),
       publisher:     publisher.trim() || null,
       cover_url:     previewOk ? coverUrl.trim() : null,
