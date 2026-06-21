@@ -1,13 +1,14 @@
 'use client'
 
-import { Comic, WishlistItem, Goal, Evento } from '@/types'
-import { mockComics, mockWishlist, mockGoals, mockEventos } from './mock-data'
+import { Comic, WishlistItem, Goal, Evento, Collection } from '@/types'
+import { mockComics, mockWishlist, mockGoals, mockEventos, mockCollections } from './mock-data'
 
 const STORAGE_KEYS = {
   comics: 'revistinhas_comics',
   wishlist: 'revistinhas_wishlist',
   goals: 'revistinhas_goals',
   eventos: 'revistinhas_eventos',
+  collections: 'revistinhas_collections',
 }
 
 function load<T>(key: string, fallback: T[]): T[] {
@@ -154,4 +155,32 @@ export function addEvento(evento: Omit<Evento, 'id'>): Evento {
 
 export function deleteEvento(id: string): void {
   saveEventos(getEventos().filter((e) => e.id !== id))
+}
+
+export function getCollections(): Collection[] {
+  return load<Collection>(STORAGE_KEYS.collections, mockCollections)
+}
+
+export function saveCollections(collections: Collection[]): void {
+  save(STORAGE_KEYS.collections, collections)
+}
+
+export function addCollection(col: Omit<Collection, 'id' | 'created_at'>): Collection {
+  const collections = getCollections()
+  const newCol: Collection = {
+    ...col,
+    id: crypto.randomUUID(),
+    created_at: new Date().toISOString(),
+  }
+  saveCollections([...collections, newCol])
+  return newCol
+}
+
+export function updateCollection(id: string, data: Partial<Collection>): void {
+  const collections = getCollections()
+  saveCollections(collections.map((c) => (c.id === id ? { ...c, ...data } : c)))
+}
+
+export function deleteCollection(id: string): void {
+  saveCollections(getCollections().filter((c) => c.id !== id))
 }

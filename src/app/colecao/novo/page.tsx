@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 import { Input, Select, Textarea } from '@/components/FormField'
@@ -37,13 +37,20 @@ const LANGS = [
   { value: 'other', label: 'Outro' },
 ]
 
-export default function NovoComicPage() {
-  const router = useRouter()
+function NovoComicForm() {
+  const router  = useRouter()
+  const params  = useSearchParams()
   const [saving, setSaving] = useState(false)
-  const [form, setForm] = useState({
-    title: '', series: '', issue_number: '', volume: '', publisher: '',
-    year: '', condition: '', purchase_price: '', current_value: '',
-    owner: 'marcelo', cover_url: '', notes: '', read: false, language: 'pt',
+  const [form, setForm] = useState(() => {
+    const series = params.get('series') ?? ''
+    const issue  = params.get('issue')  ?? ''
+    const pub    = params.get('publisher') ?? ''
+    return {
+      title: series && issue ? `${series} #${issue}` : '',
+      series, issue_number: issue, volume: '', publisher: pub,
+      year: '', condition: '', purchase_price: '', current_value: '',
+      owner: 'marcelo', cover_url: '', notes: '', read: false, language: 'pt',
+    }
   })
 
   function set(key: string, value: string | boolean) {
@@ -73,10 +80,12 @@ export default function NovoComicPage() {
     router.push('/colecao')
   }
 
+  const fromSeries = !!params.get('series')
+
   return (
     <div className="max-w-xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
-        <Link href="/colecao" className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), 'h-8 w-8')}>
+        <Link href={fromSeries ? `/colecao` : '/colecao'} className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }), 'h-8 w-8')}>
           <ArrowLeft size={16} />
         </Link>
         <div>
@@ -140,4 +149,8 @@ export default function NovoComicPage() {
       </form>
     </div>
   )
+}
+
+export default function NovoComicPage() {
+  return <Suspense><NovoComicForm /></Suspense>
 }

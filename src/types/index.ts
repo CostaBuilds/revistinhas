@@ -90,6 +90,17 @@ export const goalTypeLabels: Record<GoalType, string> = {
   outro: 'Outro',
 }
 
+export interface Collection {
+  id: string
+  created_at: string
+  name: string              // matches comic.series
+  publisher: string | null
+  cover_url: string | null
+  total_volumes: number
+  created_by: Owner
+  description: string | null
+}
+
 export type EventoTipo = 'lancamento' | 'pre_venda' | 'saldao'
 
 export interface Evento {

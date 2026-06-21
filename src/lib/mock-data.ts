@@ -1,4 +1,4 @@
-import { Comic, WishlistItem, Goal, Evento } from '@/types'
+import { Comic, WishlistItem, Goal, Evento, Collection } from '@/types'
 
 export const mockComics: Comic[] = [
   {
@@ -238,6 +238,69 @@ export const mockGoals: Goal[] = [
     type: 'valor',
     progress_current: 1960,
     progress_target: 5000,
+  },
+]
+
+export const mockCollections: Collection[] = [
+  {
+    id: 'col1',
+    created_at: '2024-01-01T00:00:00Z',
+    name: 'Watchmen',
+    publisher: 'DC Comics',
+    cover_url: null,
+    total_volumes: 12,
+    created_by: 'marcelo',
+    description: 'Série original de 12 edições de Alan Moore e Dave Gibbons (1986–1987)',
+  },
+  {
+    id: 'col2',
+    created_at: '2024-01-01T00:00:00Z',
+    name: 'Batman',
+    publisher: 'DC Comics',
+    cover_url: null,
+    total_volumes: 3,
+    created_by: 'marcelo',
+    description: 'Batman: O Cavaleiro das Trevas — Frank Miller',
+  },
+  {
+    id: 'col3',
+    created_at: '2024-01-05T00:00:00Z',
+    name: 'Sandman',
+    publisher: 'DC/Vertigo',
+    cover_url: null,
+    total_volumes: 10,
+    created_by: 'ambos',
+    description: 'Coletânea em volumes encadernados — Neil Gaiman',
+  },
+  {
+    id: 'col4',
+    created_at: '2024-02-01T00:00:00Z',
+    name: 'Amazing Spider-Man',
+    publisher: 'Marvel Comics',
+    cover_url: null,
+    total_volumes: 441,
+    created_by: 'walter',
+    description: 'Edições originais da série clássica',
+  },
+  {
+    id: 'col5',
+    created_at: '2024-02-10T00:00:00Z',
+    name: 'X-Men',
+    publisher: 'Marvel Comics',
+    cover_url: null,
+    total_volumes: 279,
+    created_by: 'walter',
+    description: 'Série clássica dos X-Men',
+  },
+  {
+    id: 'col6',
+    created_at: '2024-03-15T00:00:00Z',
+    name: 'Turma da Mônica Jovem',
+    publisher: 'Panini',
+    cover_url: null,
+    total_volumes: 83,
+    created_by: 'marcelo',
+    description: 'Manga brasileiro da turma da Mônica em estilo mangá',
   },
 ]
 
