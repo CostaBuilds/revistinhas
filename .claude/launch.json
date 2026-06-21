@@ -1,0 +1,16 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "revistinhas",
+      "runtimeExecutable": "/Users/marcelo/.nvm/versions/node/v20.20.2/bin/node",
+      "runtimeArgs": ["/Users/marcelo/Documents/codes/revistinhas/node_modules/.bin/next", "dev"],
+      "env": {
+        "PATH": "/Users/marcelo/.nvm/versions/node/v20.20.2/bin:/usr/local/bin:/usr/bin:/bin",
+        "NODE": "/Users/marcelo/.nvm/versions/node/v20.20.2/bin/node"
+      },
+      "port": 3000,
+      "autoPort": true
+    }
+  ]
+}
