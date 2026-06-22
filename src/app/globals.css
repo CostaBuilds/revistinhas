@@ -39,36 +39,67 @@
   --radius-xl: calc(var(--radius) * 1.4);
 }
 
-/* ── Marvel Comics Corner Box theme ─────────────────────────────── */
+/* ── X-Men Comics theme ──────────────────────────────────────────── */
 :root {
   color-scheme: light;
-  --background: oklch(0.965 0.022 85);    /* warm cream paper */
-  --foreground: oklch(0.10 0.01 85);      /* near-black ink */
+  --background: oklch(0.97 0.008 245);     /* off-white w/ cool blue tint */
+  --foreground: oklch(0.11 0.05 258);      /* dark navy ink */
   --card: oklch(1.0 0 0);
-  --card-foreground: oklch(0.10 0.01 85);
+  --card-foreground: oklch(0.11 0.05 258);
   --popover: oklch(1.0 0 0);
-  --popover-foreground: oklch(0.10 0.01 85);
-  --primary: oklch(0.50 0.235 27);        /* Marvel red */
-  --primary-foreground: oklch(1.0 0 0);
-  --secondary: oklch(0.87 0.15 88);       /* comic yellow */
-  --secondary-foreground: oklch(0.10 0.01 85);
-  --muted: oklch(0.93 0.015 85);
-  --muted-foreground: oklch(0.48 0.04 85);
-  --accent: oklch(0.87 0.15 88);
-  --accent-foreground: oklch(0.10 0.01 85);
-  --destructive: oklch(0.50 0.235 27);
-  --border: oklch(0.10 0.01 85 / 0.75);  /* strong ink border */
-  --input: oklch(0.10 0.01 85 / 0.12);
-  --ring: oklch(0.50 0.235 27 / 0.35);
-  --radius: 0.2rem;                       /* boxy — like comic panels */
-  --sidebar: oklch(0.15 0.04 27);
+  --popover-foreground: oklch(0.11 0.05 258);
+  --primary: oklch(0.82 0.185 93);         /* X-Men yellow/gold */
+  --primary-foreground: oklch(0.11 0.05 258);
+  --secondary: oklch(0.22 0.09 258);       /* X-Men dark navy */
+  --secondary-foreground: oklch(0.97 0.008 245);
+  --muted: oklch(0.92 0.010 248);
+  --muted-foreground: oklch(0.44 0.05 258);
+  --accent: oklch(0.82 0.185 93);
+  --accent-foreground: oklch(0.11 0.05 258);
+  --destructive: oklch(0.50 0.22 25);      /* X-Men red (Cyclops) */
+  --border: oklch(0.11 0.05 258 / 0.72);  /* strong navy border */
+  --input: oklch(0.11 0.05 258 / 0.10);
+  --ring: oklch(0.82 0.185 93 / 0.40);
+  --radius: 0.2rem;                        /* boxy — comic panels */
+  --sidebar: oklch(0.14 0.08 258);
   --sidebar-foreground: oklch(0.96 0.01 85);
-  --sidebar-primary: oklch(0.60 0.22 27);
-  --sidebar-primary-foreground: oklch(1.0 0 0);
+  --sidebar-primary: oklch(0.82 0.185 93);
+  --sidebar-primary-foreground: oklch(0.11 0.05 258);
   --sidebar-accent: oklch(1 0 0 / 0.08);
   --sidebar-accent-foreground: oklch(0.97 0.01 85);
   --sidebar-border: oklch(1 0 0 / 0.09);
-  --sidebar-ring: oklch(0.60 0.22 27 / 0.5);
+  --sidebar-ring: oklch(0.82 0.185 93 / 0.5);
+}
+
+/* ── Dark mode (X-Men midnight) ─────────────────────────────────── */
+.dark {
+  color-scheme: dark;
+  --background: oklch(0.11 0.055 258);     /* deep X-Men navy */
+  --foreground: oklch(0.94 0.020 90);
+  --card: oklch(0.15 0.055 258);
+  --card-foreground: oklch(0.94 0.020 90);
+  --popover: oklch(0.15 0.055 258);
+  --popover-foreground: oklch(0.94 0.020 90);
+  --primary: oklch(0.84 0.185 93);         /* bright X-Men yellow */
+  --primary-foreground: oklch(0.11 0.055 258);
+  --secondary: oklch(0.20 0.055 258);
+  --secondary-foreground: oklch(0.94 0.020 90);
+  --muted: oklch(0.19 0.050 258);
+  --muted-foreground: oklch(0.60 0.025 90);
+  --accent: oklch(0.84 0.185 93);
+  --accent-foreground: oklch(0.11 0.055 258);
+  --destructive: oklch(0.54 0.22 25);
+  --border: oklch(0.94 0.020 90 / 0.16);
+  --input: oklch(0.94 0.020 90 / 0.07);
+  --ring: oklch(0.84 0.185 93 / 0.35);
+  --sidebar: oklch(0.08 0.050 258);
+  --sidebar-foreground: oklch(0.94 0.01 90);
+  --sidebar-primary: oklch(0.84 0.185 93);
+  --sidebar-primary-foreground: oklch(0.11 0.055 258);
+  --sidebar-accent: oklch(1 0 0 / 0.06);
+  --sidebar-accent-foreground: oklch(0.94 0.01 90);
+  --sidebar-border: oklch(1 0 0 / 0.07);
+  --sidebar-ring: oklch(0.84 0.185 93 / 0.5);
 }
 
 @layer base {
@@ -77,9 +108,11 @@
   }
   body {
     @apply bg-background text-foreground;
-    /* Halftone dot pattern — printed comic texture */
-    background-image: radial-gradient(circle, oklch(0.10 0.01 85 / 0.07) 1px, transparent 1px);
+    background-image: radial-gradient(circle, oklch(0.11 0.05 258 / 0.07) 1px, transparent 1px);
     background-size: 14px 14px;
+  }
+  .dark body {
+    background-image: radial-gradient(circle, oklch(0.84 0.185 93 / 0.04) 1px, transparent 1px);
   }
   html {
     @apply font-sans;
@@ -89,11 +122,11 @@
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: oklch(0.10 0.01 85 / 0.18);
+  background: oklch(0.11 0.05 258 / 0.20);
   border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: oklch(0.10 0.01 85 / 0.30);
+  background: oklch(0.82 0.185 93 / 0.50);
 }
 
 /* Login page animations */

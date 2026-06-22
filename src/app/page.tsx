@@ -3,12 +3,12 @@
 import { useEffect, useState } from 'react'
 import {
   ChevronLeft, ChevronRight,
-  Shield, Zap, BookOpen, Moon, Layers, Star, Sparkles, Globe, Book,
   Package, ShoppingCart, Percent,
   BarChart3, BookMarked, Target, Clock, Building2, CalendarDays,
-  Library, DollarSign, TrendingUp, Bookmark,
-  type LucideIcon,
+  Library, DollarSign, TrendingUp, Bookmark, type LucideIcon,
 } from 'lucide-react'
+import { pubData } from '@/lib/publishers'
+import PublisherLogo from '@/components/PublisherLogo'
 import StatsCard from '@/components/StatsCard'
 import { getComicsForUser, getWishlist, getGoals, getEventos, getCollections } from '@/lib/data'
 import { useAuth } from '@/context/auth'
@@ -19,21 +19,7 @@ import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 
-// ─── Publisher identity map ───────────────────────────────────────
-const PUB: Record<string, { Icon: LucideIcon; bg: string }> = {
-  'DC Comics':         { Icon: Shield,   bg: '#0476F2' },
-  'Marvel Comics':     { Icon: Zap,      bg: '#EC1D24' },
-  'Panini':            { Icon: BookOpen, bg: '#FF5F00' },
-  'DC/Vertigo':        { Icon: Moon,     bg: '#6B21A8' },
-  'Image Comics':      { Icon: Layers,   bg: '#E53935' },
-  'Pipoca & Nanquim':  { Icon: Star,     bg: '#D97706' },
-  'Mythos':            { Icon: Sparkles, bg: '#7C3AED' },
-  'Darkside Books':    { Icon: Book,     bg: '#1F2937' },
-  'Abril':             { Icon: Globe,    bg: '#16A34A' },
-}
-const PUB_DEFAULT: { Icon: LucideIcon; bg: string } = { Icon: BookOpen, bg: '#64748b' }
-
-function pubStyle(pub: string) { return PUB[pub] ?? PUB_DEFAULT }
+function pubStyle(pub: string) { return pubData(pub) }
 
 // ─── Saga types + compute ─────────────────────────────────────────
 type SagaInfo = { name: string; owned: number; total: number; percent: number; publisher: string | null }
@@ -127,8 +113,8 @@ function ComicHeader({
 function PubBadge({ pub, size = 'sm' }: { pub: string; size?: 'sm' | 'md' | 'lg' }) {
   const s = pubStyle(pub)
   const { cls, iconSize } = {
-    sm: { cls: 'h-6 w-6 rounded-sm',  iconSize: 11 },
-    md: { cls: 'h-8 w-8 rounded-sm',  iconSize: 14 },
+    sm: { cls: 'h-6 w-6 rounded-sm',   iconSize: 11 },
+    md: { cls: 'h-8 w-8 rounded-sm',   iconSize: 14 },
     lg: { cls: 'h-10 w-10 rounded-sm', iconSize: 18 },
   }[size]
   return (
@@ -137,7 +123,7 @@ function PubBadge({ pub, size = 'sm' }: { pub: string; size?: 'sm' | 'md' | 'lg'
       style={{ background: s.bg + '25' }}
       title={pub}
     >
-      <s.Icon size={iconSize} style={{ color: s.bg }} />
+      <PublisherLogo publisher={pub} size={iconSize} />
     </div>
   )
 }

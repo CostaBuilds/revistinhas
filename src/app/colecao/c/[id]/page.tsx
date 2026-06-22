@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import {
   ArrowLeft, Plus, Check, X, Copy, Pencil, Trash2, BookOpen,
-  Shield, Zap, Moon, Layers, Star,
-  Sparkles, Globe, Book, type LucideIcon,
 } from 'lucide-react'
+import { pubData } from '@/lib/publishers'
+import PublisherLogo from '@/components/PublisherLogo'
 import {
   getCollections, getComics, addComic, deleteCollection, updateCollection,
 } from '@/lib/data'
@@ -19,19 +19,6 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 
-// ─── Publisher map ────────────────────────────────────────────────
-const PUB: Record<string, { Icon: LucideIcon; bg: string }> = {
-  'DC Comics':        { Icon: Shield,       bg: '#0476F2' },
-  'Marvel Comics':    { Icon: Zap,          bg: '#EC1D24' },
-  'Panini':           { Icon: BookOpen,     bg: '#FF5F00' },
-  'DC/Vertigo':       { Icon: Moon,         bg: '#6B21A8' },
-  'Image Comics':     { Icon: Layers,       bg: '#E53935' },
-  'Pipoca & Nanquim': { Icon: Star,         bg: '#D97706' },
-  'Mythos':           { Icon: Sparkles,     bg: '#7C3AED' },
-  'Darkside Books':   { Icon: Book,         bg: '#1F2937' },
-  'Abril':            { Icon: Globe,        bg: '#16A34A' },
-}
-function pubStyle(pub: string | null) { return (pub && PUB[pub]) ? PUB[pub] : { Icon: BookOpen, bg: '#64748b' } }
 
 // ─── Copy modal ───────────────────────────────────────────────────
 function CopyModal({
@@ -371,7 +358,7 @@ export default function CollectionDetailPage() {
     </div>
   )
 
-  const s         = pubStyle(collection.publisher)
+  const s         = pubData(collection.publisher)
   const allComics = comics.filter((c) => (c.series ?? c.title) === collection.name)
 
   // Per-user owned volumes
@@ -418,7 +405,7 @@ export default function CollectionDetailPage() {
           {/* Publisher header */}
           <div className="flex items-center justify-between px-4 py-2.5 border-b-2 border-foreground/80" style={{ background: s.bg }}>
             <div className="flex items-center gap-2">
-              <s.Icon size={13} color="#fff" strokeWidth={2.5} />
+              <PublisherLogo publisher={collection.publisher} size={13} inverted />
               <span className="font-comic text-sm uppercase tracking-[0.18em] text-white">{collection.publisher ?? 'Sem editora'}</span>
             </div>
             <div className="flex items-center gap-2">
@@ -451,7 +438,7 @@ export default function CollectionDetailPage() {
                 <img src={collection.cover_url} alt={collection.name} className="w-full h-full object-cover" />
               ) : (
                 <div className="flex flex-col items-center gap-2 text-center p-2">
-                  <s.Icon size={28} style={{ color: s.bg }} className="opacity-40" />
+                  <PublisherLogo publisher={collection.publisher} size={28} className="opacity-40" />
                   <span className="font-comic text-[9px] uppercase tracking-wide opacity-40">Add capa</span>
                 </div>
               )}

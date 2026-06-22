@@ -10,25 +10,10 @@ import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Separator } from '@/components/ui/separator'
-import {
-  Shield, Zap, BookOpen as BookOpenIcon, Moon, Layers, Star, Sparkles, Globe, Book,
-  type LucideIcon,
-} from 'lucide-react'
+import { pubData } from '@/lib/publishers'
+import PublisherLogo from '@/components/PublisherLogo'
 
-// ─── Publisher identity (same as dashboard) ───────────────────────
-const PUB: Record<string, { Icon: LucideIcon; bg: string }> = {
-  'DC Comics':        { Icon: Shield,       bg: '#0476F2' },
-  'Marvel Comics':    { Icon: Zap,          bg: '#EC1D24' },
-  'Panini':           { Icon: BookOpenIcon, bg: '#FF5F00' },
-  'DC/Vertigo':       { Icon: Moon,         bg: '#6B21A8' },
-  'Image Comics':     { Icon: Layers,       bg: '#E53935' },
-  'Pipoca & Nanquim': { Icon: Star,         bg: '#D97706' },
-  'Mythos':           { Icon: Sparkles,     bg: '#7C3AED' },
-  'Darkside Books':   { Icon: Book,         bg: '#1F2937' },
-  'Abril':            { Icon: Globe,        bg: '#16A34A' },
-}
-const PUB_DEFAULT = { Icon: BookOpen, bg: '#64748b' }
-function pubStyle(pub: string) { return PUB[pub] ?? PUB_DEFAULT }
+function pubStyle(pub: string) { return pubData(pub) }
 
 type Tab = 'colecoes' | 'hqs'
 type ColSort = 'insercao_desc' | 'insercao_asc' | 'az' | 'za' | 'progresso_desc' | 'volumes_desc'
@@ -277,7 +262,7 @@ export default function ColecaoPage() {
                   style={{ background: s.bg }}
                 >
                   <div className="flex items-center gap-2">
-                    <s.Icon size={14} color="#fff" strokeWidth={2.5} />
+                    <PublisherLogo publisher={pub} size={14} inverted />
                     <span className="font-comic text-sm uppercase tracking-[0.18em] text-white">{pub}</span>
                     <span className="font-comic text-[10px] text-white/70 tracking-wider">
                       {cols.length} coleção{cols.length !== 1 ? 'ões' : ''}
@@ -415,7 +400,7 @@ function HqListView({ comics }: { comics: Comic[] }) {
               className="grid grid-cols-[auto_1fr_auto_auto] gap-3 px-4 py-2.5 hover:bg-muted/40 transition-colors items-center"
             >
               <div className="h-7 w-7 rounded-sm flex items-center justify-center border border-foreground/20" style={{ background: s.bg + '20' }}>
-                <s.Icon size={12} style={{ color: s.bg }} />
+                <PublisherLogo publisher={comic.publisher} size={12} />
               </div>
               <div className="min-w-0 flex items-center gap-2">
                 <div className="min-w-0">
@@ -456,7 +441,7 @@ function HqGridView({ comics }: { comics: Comic[] }) {
                   <img src={comic.cover_url} alt={comic.title} className="w-full h-full object-cover" />
                 ) : (
                   <div className="flex flex-col items-center gap-2 p-3 text-center">
-                    <s.Icon size={24} style={{ color: s.bg }} className="opacity-50" />
+                    <PublisherLogo publisher={comic.publisher} size={24} className="opacity-50" />
                     {comic.issue_number != null && (
                       <span className="font-comic text-xl tabular-nums" style={{ color: s.bg }}>#{comic.issue_number}</span>
                     )}

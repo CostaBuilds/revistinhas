@@ -2,12 +2,13 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Sparkles, Bell, LogOut, Menu, Search } from 'lucide-react'
+import { Sparkles, Bell, LogOut, Menu, Search, Moon, Sun } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { buttonVariants } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { useAuth } from '@/context/auth'
+import { useTheme } from '@/context/theme'
 import { getEventos } from '@/lib/data'
 
 const nav = [
@@ -28,6 +29,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname               = usePathname()
   const router                 = useRouter()
   const { user, loading, logout } = useAuth()
+  const { theme, toggle: toggleTheme } = useTheme()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [eventCount, setEventCount] = useState(0)
 
@@ -103,6 +105,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             {/* Search */}
             <button className="h-8 w-8 rounded-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors">
               <Search size={14} />
+            </button>
+
+            {/* Theme toggle */}
+            <button
+              onClick={toggleTheme}
+              title={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
+              className="h-8 w-8 rounded-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+            >
+              {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
             </button>
 
             {/* Bell + badge */}
