@@ -531,69 +531,111 @@ export default function CollectionDetailPage() {
           </div>
           <div className="p-4">
             <div className="grid grid-cols-[repeat(auto-fill,minmax(52px,1fr))] gap-2">
-              {vol.map((n) => {
-                const mHas = marceloOwned.has(n)
-                const wHas = walterOwned.has(n)
-                const both = mHas && wHas
-                const none = !mHas && !wHas
-
-                // Find comic for this volume
-                const comic = allComics.find(c => (c.issue_number ?? c.volume) === n)
-
-                return (
-                  <div key={n} className="relative group">
-                    <Link
-                      href={comic ? `/colecao/${comic.id}` : `/colecao/novo?series=${encodeURIComponent(collection.name)}&issue=${n}&publisher=${encodeURIComponent(collection.publisher ?? '')}`}
-                      className={cn(
-                        'aspect-[2/3] rounded-sm border-2 flex flex-col items-center justify-center gap-0.5 transition-all font-comic text-sm overflow-hidden relative',
-                        both  ? 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-[2px_2px_0px_#059669]'
-                              : mHas ? 'border-red-400 bg-red-50 text-red-700 shadow-[2px_2px_0px_#DC2626]'
-                              : wHas ? 'border-blue-400 bg-blue-50 text-blue-700 shadow-[2px_2px_0px_#2563EB]'
-                              : 'border-foreground/20 bg-muted/20 text-muted-foreground hover:border-foreground/40 hover:bg-muted/40'
-                      )}
-                      title={
-                        both  ? `Vol. ${n} — Ambos têm`
-                              : mHas ? `Vol. ${n} — Marcelo tem`
-                              : wHas ? `Vol. ${n} — Walter tem`
-                              : `Vol. ${n} — Nenhum tem · Clique para adicionar`
-                      }
-                    >
-                      {comic?.cover_url ? (
-                        <>
-                          <img src={comic.cover_url} alt={`Vol. ${n}`} className="absolute inset-0 w-full h-full object-cover" />
-                          {(mHas || wHas) && (
-                            <span
-                              className="absolute bottom-0 inset-x-0 text-center py-0.5 text-[7px] font-comic leading-none text-white"
-                              style={{ background: both ? 'rgba(5,150,105,0.88)' : mHas ? 'rgba(220,38,38,0.88)' : 'rgba(37,99,235,0.88)' }}
-                            >
-                              {both ? 'M+W' : mHas ? 'M' : 'W'}
-                            </span>
+              {collection.total_volumes === null ? (
+                // Em aberto: iterate over actual comics
+                allComics
+                  .slice()
+                  .sort((a, b) => (a.issue_number ?? a.volume ?? 0) - (b.issue_number ?? b.volume ?? 0))
+                  .map((comic) => {
+                    const mHas = comic.owner === 'marcelo' || comic.owner === 'ambos'
+                    const wHas = comic.owner === 'walter'  || comic.owner === 'ambos'
+                    const both = mHas && wHas
+                    const n    = comic.issue_number ?? comic.volume
+                    return (
+                      <div key={comic.id} className="relative group">
+                        <Link
+                          href={`/colecao/${comic.id}`}
+                          className={cn(
+                            'aspect-[2/3] rounded-sm border-2 flex flex-col items-center justify-center gap-0.5 transition-all font-comic text-sm overflow-hidden relative',
+                            both  ? 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-[2px_2px_0px_#059669]'
+                                  : mHas ? 'border-red-400 bg-red-50 text-red-700 shadow-[2px_2px_0px_#DC2626]'
+                                  : 'border-blue-400 bg-blue-50 text-blue-700 shadow-[2px_2px_0px_#2563EB]'
                           )}
-                          {comic?.omnibus && (
-                            <span className="absolute top-0 right-0 bg-yellow-400 text-yellow-950 font-comic text-[6px] uppercase px-1 py-0.5 leading-none border-l border-b border-yellow-600">
-                              OT
-                            </span>
+                          title={`${n != null ? `Vol. ${n}` : comic.title} — ${both ? 'Ambos têm' : mHas ? 'Marcelo tem' : 'Walter tem'}`}
+                        >
+                          {comic.cover_url ? (
+                            <>
+                              <img src={comic.cover_url} alt={comic.title} className="absolute inset-0 w-full h-full object-cover" />
+                              <span
+                                className="absolute bottom-0 inset-x-0 text-center py-0.5 text-[7px] font-comic leading-none text-white"
+                                style={{ background: both ? 'rgba(5,150,105,0.88)' : mHas ? 'rgba(220,38,38,0.88)' : 'rgba(37,99,235,0.88)' }}
+                              >
+                                {both ? 'M+W' : mHas ? 'M' : 'W'}
+                              </span>
+                              {comic.omnibus && (
+                                <span className="absolute top-0 right-0 bg-yellow-400 text-yellow-950 font-comic text-[6px] uppercase px-1 py-0.5 leading-none border-l border-b border-yellow-600">OT</span>
+                              )}
+                            </>
+                          ) : (
+                            <>
+                              <span className="tabular-nums text-[11px] leading-none">{n ?? '?'}</span>
+                              <span className="text-[8px] leading-none opacity-70">{both ? 'M+W' : mHas ? 'M' : 'W'}</span>
+                              {comic.omnibus && (
+                                <span className="absolute top-0 right-0 bg-yellow-400 text-yellow-950 font-comic text-[6px] uppercase px-1 py-0.5 leading-none border-l border-b border-yellow-600">OT</span>
+                              )}
+                            </>
                           )}
-                        </>
-                      ) : (
-                        <>
-                          <span className="tabular-nums text-[11px] leading-none">{n}</span>
-                          {(mHas || wHas) && (
-                            <span className="text-[8px] leading-none opacity-70">
-                              {both ? 'M+W' : mHas ? 'M' : 'W'}
-                            </span>
-                          )}
-                          {comic?.omnibus && (
-                            <span className="absolute top-0 right-0 bg-yellow-400 text-yellow-950 font-comic text-[6px] uppercase px-1 py-0.5 leading-none border-l border-b border-yellow-600">
-                              OT
-                            </span>
-                          )}
-                        </>
-                      )}
-                    </Link>
-                  </div>
-                )
-              })}
+                        </Link>
+                      </div>
+                    )
+                  })
+              ) : (
+                // Defined total: sequential numbered grid
+                vol.map((n) => {
+                  const mHas = marceloOwned.has(n)
+                  const wHas = walterOwned.has(n)
+                  const both = mHas && wHas
+                  const none = !mHas && !wHas
+                  const comic = allComics.find(c => (c.issue_number ?? c.volume) === n)
+                  return (
+                    <div key={n} className="relative group">
+                      <Link
+                        href={comic ? `/colecao/${comic.id}` : `/colecao/novo?series=${encodeURIComponent(collection.name)}&issue=${n}&publisher=${encodeURIComponent(collection.publisher ?? '')}`}
+                        className={cn(
+                          'aspect-[2/3] rounded-sm border-2 flex flex-col items-center justify-center gap-0.5 transition-all font-comic text-sm overflow-hidden relative',
+                          both  ? 'border-emerald-500 bg-emerald-50 text-emerald-700 shadow-[2px_2px_0px_#059669]'
+                                : mHas ? 'border-red-400 bg-red-50 text-red-700 shadow-[2px_2px_0px_#DC2626]'
+                                : wHas ? 'border-blue-400 bg-blue-50 text-blue-700 shadow-[2px_2px_0px_#2563EB]'
+                                : 'border-foreground/20 bg-muted/20 text-muted-foreground hover:border-foreground/40 hover:bg-muted/40'
+                        )}
+                        title={
+                          both ? `Vol. ${n} — Ambos têm`
+                               : mHas ? `Vol. ${n} — Marcelo tem`
+                               : wHas ? `Vol. ${n} — Walter tem`
+                               : `Vol. ${n} — Nenhum tem · Clique para adicionar`
+                        }
+                      >
+                        {comic?.cover_url ? (
+                          <>
+                            <img src={comic.cover_url} alt={`Vol. ${n}`} className="absolute inset-0 w-full h-full object-cover" />
+                            {(mHas || wHas) && (
+                              <span
+                                className="absolute bottom-0 inset-x-0 text-center py-0.5 text-[7px] font-comic leading-none text-white"
+                                style={{ background: both ? 'rgba(5,150,105,0.88)' : mHas ? 'rgba(220,38,38,0.88)' : 'rgba(37,99,235,0.88)' }}
+                              >
+                                {both ? 'M+W' : mHas ? 'M' : 'W'}
+                              </span>
+                            )}
+                            {comic?.omnibus && (
+                              <span className="absolute top-0 right-0 bg-yellow-400 text-yellow-950 font-comic text-[6px] uppercase px-1 py-0.5 leading-none border-l border-b border-yellow-600">OT</span>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <span className="tabular-nums text-[11px] leading-none">{n}</span>
+                            {(mHas || wHas) && (
+                              <span className="text-[8px] leading-none opacity-70">{both ? 'M+W' : mHas ? 'M' : 'W'}</span>
+                            )}
+                            {comic?.omnibus && (
+                              <span className="absolute top-0 right-0 bg-yellow-400 text-yellow-950 font-comic text-[6px] uppercase px-1 py-0.5 leading-none border-l border-b border-yellow-600">OT</span>
+                            )}
+                          </>
+                        )}
+                      </Link>
+                    </div>
+                  )
+                })
+              )}
             </div>
 
             {/* Legend */}
