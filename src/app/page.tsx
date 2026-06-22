@@ -191,7 +191,7 @@ function ValueBreakdownCard({ comics }: { comics: Comic[] }) {
 }
 
 // ─── Featured comic ───────────────────────────────────────────────
-function FeaturedComicCard({ comic }: { comic: Comic | null }) {
+function FeaturedComicCard({ comic, user }: { comic: Comic | null; user: 'marcelo' | 'walter' }) {
   if (!comic) return (
     <ComicCard>
       <div className="p-6 text-center text-sm text-muted-foreground">
@@ -242,7 +242,11 @@ function FeaturedComicCard({ comic }: { comic: Comic | null }) {
             </div>
             <div>
               <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Pago</p>
-              <p className="font-comic text-base leading-none">{formatCurrency(comic.purchase_price)}</p>
+              <p className="font-comic text-base leading-none">{formatCurrency(
+                comic.owner === 'ambos'
+                  ? (user === 'marcelo' ? comic.purchase_price_marcelo : comic.purchase_price_walter) ?? null
+                  : comic.purchase_price
+              )}</p>
             </div>
             <div>
               <p className="text-[9px] text-muted-foreground uppercase tracking-wider">Dono</p>
@@ -523,7 +527,7 @@ function AgendaCalendarCard({ eventos }: { eventos: Evento[] }) {
 }
 
 // ─── Recent comics table ──────────────────────────────────────────
-function RecentComicsCard({ comics }: { comics: Comic[] }) {
+function RecentComicsCard({ comics, user }: { comics: Comic[]; user: 'marcelo' | 'walter' }) {
   return (
     <ComicCard>
       <ComicHeader
@@ -660,7 +664,13 @@ export default function DashboardPage() {
   }, [user])
 
   const totalValue = comics.reduce((s, c) => s + (c.current_value ?? 0), 0)
-  const totalPaid  = comics.reduce((s, c) => s + (c.purchase_price ?? 0), 0)
+  const totalPaid  = comics.reduce((s, c) => {
+    if (c.owner === 'ambos') {
+      const price = user === 'marcelo' ? c.purchase_price_marcelo : c.purchase_price_walter
+      return s + (price ?? 0)
+    }
+    return s + (c.purchase_price ?? 0)
+  }, 0)
   const gain       = totalValue - totalPaid
   const gainPct    = totalPaid > 0 ? ((gain / totalPaid) * 100).toFixed(1) : '0'
 
@@ -717,11 +727,11 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-3 items-start">
         <div className="xl:col-span-4 flex flex-col gap-3">
           <ValueBreakdownCard comics={comics} />
-          <RecentComicsCard comics={recentComics} />
+          <RecentComicsCard comics={recentComics} user={user!} />
           <PublisherCollectionCard comics={comics} />
         </div>
         <div className="xl:col-span-5 flex flex-col gap-3">
-          <FeaturedComicCard comic={recentComics[0] ?? null} />
+          <FeaturedComicCard comic={recentComics[0] ?? null} user={user!} />
           <SagaCarouselCard sagas={sagas} />
           <GoalsCard goals={goals} />
         </div>

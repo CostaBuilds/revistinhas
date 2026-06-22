@@ -48,7 +48,7 @@ function NovoComicForm() {
     return {
       title: series && issue ? `${series} #${issue}` : '',
       series, issue_number: issue, volume: '', publisher: pub,
-      year: '', condition: '', purchase_price: '', current_value: '',
+      year: '', condition: '', purchase_price: '', purchase_price_marcelo: '', purchase_price_walter: '', current_value: '',
       owner: 'marcelo', cover_url: '', notes: '', read: false, language: 'pt',
     }
   })
@@ -70,7 +70,9 @@ function NovoComicForm() {
         publisher: form.publisher.trim() || null,
         year: form.year ? parseInt(form.year) : null,
         condition: (form.condition as Condition) || null,
-        purchase_price: form.purchase_price ? parseFloat(form.purchase_price.replace(',', '.')) : null,
+        purchase_price: form.owner !== 'ambos' && form.purchase_price ? parseFloat(form.purchase_price.replace(',', '.')) : null,
+        purchase_price_marcelo: form.owner === 'ambos' && form.purchase_price_marcelo ? parseFloat(form.purchase_price_marcelo.replace(',', '.')) : null,
+        purchase_price_walter: form.owner === 'ambos' && form.purchase_price_walter ? parseFloat(form.purchase_price_walter.replace(',', '.')) : null,
         current_value: form.current_value ? parseFloat(form.current_value.replace(',', '.')) : null,
         owner: form.owner as Owner,
         cover_url: form.cover_url.trim() || null,
@@ -124,10 +126,15 @@ function NovoComicForm() {
               <Select label="Condição" value={form.condition} onChange={(v) => set('condition', v)} options={CONDITIONS} />
               <Select label="Idioma" value={form.language} onChange={(v) => set('language', v)} options={LANGS} />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            {form.owner === 'ambos' ? (
+              <div className="grid grid-cols-2 gap-3">
+                <Input label="Preço pago — Marcelo (R$)" type="text" inputMode="decimal" value={form.purchase_price_marcelo} onChange={(e) => set('purchase_price_marcelo', e.target.value)} placeholder="0,00" />
+                <Input label="Preço pago — Walter (R$)" type="text" inputMode="decimal" value={form.purchase_price_walter} onChange={(e) => set('purchase_price_walter', e.target.value)} placeholder="0,00" />
+              </div>
+            ) : (
               <Input label="Preço pago (R$)" type="text" inputMode="decimal" value={form.purchase_price} onChange={(e) => set('purchase_price', e.target.value)} placeholder="0,00" />
-              <Input label="Valor atual (R$)" type="text" inputMode="decimal" value={form.current_value} onChange={(e) => set('current_value', e.target.value)} placeholder="0,00" />
-            </div>
+            )}
+            <Input label="Valor atual (R$)" type="text" inputMode="decimal" value={form.current_value} onChange={(e) => set('current_value', e.target.value)} placeholder="0,00" />
           </CardContent>
         </Card>
 

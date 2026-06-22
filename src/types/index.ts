@@ -25,6 +25,8 @@ export interface Comic {
   year: number | null
   condition: Condition | null
   purchase_price: number | null
+  purchase_price_marcelo?: number | null
+  purchase_price_walter?: number | null
   current_value: number | null
   owner: Owner
   cover_url: string | null

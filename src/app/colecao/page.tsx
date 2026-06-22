@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { Plus, Search, LayoutGrid, List, BookOpen, Copy } from 'lucide-react'
 import { Comic, Collection, Owner } from '@/types'
-import { getComicsForUser, getCollections } from '@/lib/data'
+import { getComics, getCollections } from '@/lib/data'
 import { useAuth } from '@/context/auth'
 import { cn, formatCurrency, ownerColor } from '@/lib/utils'
 import Link from 'next/link'
@@ -43,7 +43,7 @@ export default function ColecaoPage() {
 
   useEffect(() => {
     if (!user) return
-    getComicsForUser(user).then(setComics)
+    getComics().then(setComics)
     getCollections().then(setCollections)
   }, [user])
 
@@ -195,7 +195,7 @@ export default function ColecaoPage() {
                 {/* Collection cards */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
                   {cols.map((col) => (
-                    <CollectionCard key={col.id} collection={col} comics={comics} pubBg={s.bg} />
+                    <CollectionCard key={col.id} collection={col} comics={comics} pubBg={s.bg} user={user ?? 'marcelo'} />
                   ))}
                   {/* Add new */}
                   <Link
@@ -230,9 +230,9 @@ export default function ColecaoPage() {
 }
 
 // ─── Collection card (comic book cover style) ─────────────────────
-function CollectionCard({ collection, comics, pubBg }: { collection: Collection; comics: Comic[]; pubBg: string }) {
+function CollectionCard({ collection, comics, pubBg, user }: { collection: Collection; comics: Comic[]; pubBg: string; user: 'marcelo' | 'walter' }) {
   const owned = comics.filter(
-    (c) => (c.series ?? c.title) === collection.name
+    (c) => (c.series ?? c.title) === collection.name && (c.owner === user || c.owner === 'ambos')
   ).length
   const pct   = Math.min(100, collection.total_volumes > 0 ? (owned / collection.total_volumes) * 100 : 0)
 

@@ -157,21 +157,34 @@ export default function ComicDetailPage({ params }: { params: Promise<{ id: stri
           </Card>
 
           <div className="grid grid-cols-2 gap-3">
-            <Card className="border-border/60">
-              <CardContent className="p-4">
-                <p className="text-xs text-muted-foreground">Preço pago</p>
-                <p className="text-xl font-semibold mt-0.5 tabular-nums">{formatCurrency(comic.purchase_price)}</p>
-              </CardContent>
-            </Card>
-            <Card className="border-border/60">
+            {comic.owner === 'ambos' ? (
+              <Card className="border-border/60 col-span-2">
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground mb-2">Preço pago</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <p className="text-[10px] text-muted-foreground">Marcelo</p>
+                      <p className="text-lg font-semibold tabular-nums">{formatCurrency(comic.purchase_price_marcelo ?? null)}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-muted-foreground">Walter</p>
+                      <p className="text-lg font-semibold tabular-nums">{formatCurrency(comic.purchase_price_walter ?? null)}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-border/60">
+                <CardContent className="p-4">
+                  <p className="text-xs text-muted-foreground">Preço pago</p>
+                  <p className="text-xl font-semibold mt-0.5 tabular-nums">{formatCurrency(comic.purchase_price)}</p>
+                </CardContent>
+              </Card>
+            )}
+            <Card className={comic.owner === 'ambos' ? 'border-border/60 col-span-2' : 'border-border/60'}>
               <CardContent className="p-4">
                 <p className="text-xs text-muted-foreground">Valor atual</p>
                 <p className="text-xl font-semibold mt-0.5 tabular-nums">{formatCurrency(comic.current_value)}</p>
-                {comic.purchase_price != null && comic.current_value != null && comic.current_value > comic.purchase_price && (
-                  <p className="text-xs text-emerald-400 mt-0.5">
-                    +{formatCurrency(comic.current_value - comic.purchase_price)}
-                  </p>
-                )}
               </CardContent>
             </Card>
           </div>
@@ -202,10 +215,15 @@ export default function ComicDetailPage({ params }: { params: Promise<{ id: stri
               <Select label="Condição" value={form.condition ?? ''} onChange={(v) => set('condition', v as Condition)} options={CONDITIONS} />
               <Select label="Dono" value={form.owner ?? 'marcelo'} onChange={(v) => set('owner', v as Owner)} options={OWNERS} />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            {form.owner === 'ambos' ? (
+              <div className="grid grid-cols-2 gap-3">
+                <Input label="Preço pago — Marcelo (R$)" type="text" value={String(form.purchase_price_marcelo ?? '')} onChange={(e) => set('purchase_price_marcelo', e.target.value)} />
+                <Input label="Preço pago — Walter (R$)" type="text" value={String(form.purchase_price_walter ?? '')} onChange={(e) => set('purchase_price_walter', e.target.value)} />
+              </div>
+            ) : (
               <Input label="Preço pago (R$)" type="text" value={String(form.purchase_price ?? '')} onChange={(e) => set('purchase_price', e.target.value)} />
-              <Input label="Valor atual (R$)" type="text" value={String(form.current_value ?? '')} onChange={(e) => set('current_value', e.target.value)} />
-            </div>
+            )}
+            <Input label="Valor atual (R$)" type="text" value={String(form.current_value ?? '')} onChange={(e) => set('current_value', e.target.value)} />
             <Input label="URL da capa" type="url" value={form.cover_url ?? ''} onChange={(e) => set('cover_url', e.target.value)} />
             <Textarea label="Notas" value={form.notes ?? ''} onChange={(e) => set('notes', e.target.value)} />
             <div className="flex items-center gap-2">
