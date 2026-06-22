@@ -10,8 +10,8 @@ const MARCELO_COVER = '/covers/marcelo.jpg'
 // ── Center 3D floating comic ──────────────────────────────────────
 function ComicCover() {
   return (
-    <div style={{ filter: 'drop-shadow(0 36px 72px rgba(0,0,0,0.9)) drop-shadow(0 0 48px rgba(236,29,36,0.20))' }}>
-      <svg viewBox="0 0 302 426" width="254" height="358" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block' }}>
+    <div style={{ filter: 'drop-shadow(0 52px 104px rgba(0,0,0,0.9)) drop-shadow(0 0 70px rgba(236,29,36,0.22))' }}>
+      <svg viewBox="0 0 302 426" width="368" height="518" xmlns="http://www.w3.org/2000/svg" style={{ display: 'block' }}>
         <defs>
           <clipPath id="cc"><rect x="0" y="0" width="302" height="426" rx="6" ry="6" /></clipPath>
           <linearGradient id="cSpine" x1="0" y1="0" x2="1" y2="0">
@@ -61,7 +61,7 @@ function CornerBox({ id, coverUrl, glow, selected, password, error, submitting, 
   return (
     <div className="flex flex-col items-center gap-3">
       {/* Cover + overlay wrapper */}
-      <div className="relative" style={{ width: 168 }}>
+      <div className="relative" style={{ width: 244 }}>
         {/* Book button */}
         <button
           onClick={onSelect}
@@ -70,12 +70,12 @@ function CornerBox({ id, coverUrl, glow, selected, password, error, submitting, 
         >
           <div
             className="relative transition-transform duration-200 ease-out group-hover:scale-[1.04] group-hover:-translate-y-1"
-            style={{ filter: 'drop-shadow(0 20px 44px rgba(0,0,0,0.9))' }}
+            style={{ filter: 'drop-shadow(0 29px 64px rgba(0,0,0,0.9))' }}
           >
             <div className="absolute rounded-[5px] bg-[#060606]" style={{ top: 6, right: -6, bottom: 0, left: 0 }} />
             <div
               className="relative z-10 overflow-hidden rounded-[5px]"
-              style={{ width: 168, aspectRatio: '605 / 1000', border: '3px solid rgba(0,0,0,0.80)' }}
+              style={{ width: 244, aspectRatio: '605 / 1000', border: '3px solid rgba(0,0,0,0.80)' }}
             >
               <img src={coverUrl} alt={id} className="w-full h-full object-cover select-none" draggable={false} />
               <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: 'radial-gradient(circle, rgba(0,0,0,0.15) 1px, transparent 1px)', backgroundSize: '4px 4px' }} />
@@ -202,7 +202,7 @@ export default function LoginPage() {
       </p>
 
       {/* Three-column row */}
-      <div className="relative z-10 flex items-center gap-10 lg:gap-16">
+      <div className="relative z-10 flex items-center gap-12 lg:gap-20">
 
         {/* LEFT: Walter */}
         <CornerBox
@@ -225,7 +225,7 @@ export default function LoginPage() {
           </div>
           <div
             className="absolute pointer-events-none"
-            style={{ bottom: -18, width: 190, height: 13, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(0,0,0,0.80) 0%, transparent 80%)', animation: 'comicShadow 4.5s ease-in-out infinite' }}
+            style={{ bottom: -26, width: 276, height: 19, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(0,0,0,0.80) 0%, transparent 80%)', animation: 'comicShadow 4.5s ease-in-out infinite' }}
           />
         </div>
 

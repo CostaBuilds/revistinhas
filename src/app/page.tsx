@@ -715,8 +715,10 @@ export default function DashboardPage() {
 
       {/* Main 3-column grid */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-3 items-start">
-        <div className="xl:col-span-4">
+        <div className="xl:col-span-4 flex flex-col gap-3">
           <ValueBreakdownCard comics={comics} />
+          <RecentComicsCard comics={recentComics} />
+          <PublisherCollectionCard comics={comics} />
         </div>
         <div className="xl:col-span-5 flex flex-col gap-3">
           <FeaturedComicCard comic={recentComics[0] ?? null} />
@@ -728,15 +730,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Bottom row */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-3 items-start">
-        <div className="xl:col-span-7">
-          <RecentComicsCard comics={recentComics} />
-        </div>
-        <div className="xl:col-span-5">
-          <PublisherCollectionCard comics={comics} />
-        </div>
-      </div>
     </div>
   )
 }
