@@ -679,7 +679,7 @@ export default function DashboardPage() {
       {/* Banner */}
       <div className="relative w-full overflow-hidden rounded-sm border-2 border-foreground/70 shadow-[4px_4px_0px_rgba(0,0,0,0.55)]" style={{ aspectRatio: '5/1' }}>
         <img
-          src="/cover.jpg"
+          src="/banner.jpg"
           alt="Banner"
           className="absolute inset-0 w-full h-full object-cover object-center"
           onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
