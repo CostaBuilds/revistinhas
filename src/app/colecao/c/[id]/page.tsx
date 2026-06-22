@@ -48,8 +48,11 @@ function CopyModal({
 
   function selectAll() {
     const all = new Set<number>()
-    for (let i = 1; i <= collection.total_volumes; i++) {
-      if (!alreadyOwned.has(i)) all.add(i)
+    const range = collection.total_volumes
+      ? Array.from({ length: collection.total_volumes }, (_, i) => i + 1)
+      : Array.from(new Set(comics.filter(c => (c.series ?? c.title) === collection.name).map(c => c.issue_number ?? c.volume ?? 0).filter(n => n > 0))).sort((a, b) => a - b)
+    for (const n of range) {
+      if (!alreadyOwned.has(n)) all.add(n)
     }
     setChecked(all)
   }
@@ -86,7 +89,12 @@ function CopyModal({
     }
   }
 
-  const vol = Array.from({ length: collection.total_volumes }, (_, i) => i + 1)
+  const knownVols = Array.from(new Set(
+    comics.filter(c => (c.series ?? c.title) === collection.name).map(c => c.issue_number ?? c.volume ?? 0).filter(n => n > 0)
+  )).sort((a, b) => a - b)
+  const vol = collection.total_volumes
+    ? Array.from({ length: collection.total_volumes }, (_, i) => i + 1)
+    : knownVols
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -198,7 +206,7 @@ function EditCollectionModal({ collection, onSave, onClose }: {
 }) {
   const [name,         setName]         = useState(collection.name)
   const [publisher,    setPublisher]     = useState(collection.publisher ?? '')
-  const [totalVolumes, setTotalVolumes]  = useState(String(collection.total_volumes))
+  const [totalVolumes, setTotalVolumes]  = useState(collection.total_volumes != null ? String(collection.total_volumes) : '')
   const [description,  setDescription]   = useState(collection.description ?? '')
   const [coverUrl,     setCoverUrl]      = useState(collection.cover_url ?? '')
   const [omnibus,      setOmnibus]       = useState(collection.omnibus)
@@ -220,7 +228,7 @@ function EditCollectionModal({ collection, onSave, onClose }: {
       await onSave({
         name:          name.trim(),
         publisher:     publisher.trim() || null,
-        total_volumes: parseInt(totalVolumes) || 1,
+        total_volumes: totalVolumes.trim() ? parseInt(totalVolumes) : null,
         description:   description.trim() || null,
         cover_url:     previewOk || (!coverUrl && !collection.cover_url) ? (coverUrl.trim() || null) : collection.cover_url,
         omnibus,
@@ -291,9 +299,12 @@ function EditCollectionModal({ collection, onSave, onClose }: {
 
           {/* Total de volumes */}
           <div className="space-y-1.5">
-            <Label className="font-comic text-[10px] uppercase tracking-widest">Total de volumes</Label>
+            <Label className="font-comic text-[10px] uppercase tracking-widest">
+              Total de volumes <span className="text-muted-foreground normal-case font-sans text-[10px]">(opcional)</span>
+            </Label>
             <Input type="number" min="1" max="9999" value={totalVolumes}
               onChange={(e) => setTotalVolumes(e.target.value)}
+              placeholder="Em aberto"
               className="rounded-sm border-2 border-foreground/40 h-9 w-28" />
           </div>
 
@@ -366,7 +377,7 @@ export default function CollectionDetailPage() {
   const walterOwned  = new Set(allComics.filter(c => c.owner === 'walter'  || c.owner === 'ambos').map(c => c.issue_number ?? c.volume ?? 0))
 
   const currentOwned = user === 'walter' ? walterOwned : marceloOwned
-  const currentPct   = Math.min(100, collection.total_volumes > 0 ? (currentOwned.size / collection.total_volumes) * 100 : 0)
+  const currentPct   = collection.total_volumes ? Math.min(100, (currentOwned.size / collection.total_volumes) * 100) : 0
 
   const canCopy      = collection.created_by === 'ambos' || user !== collection.created_by
   const targetOwner  = (user as Owner) ?? 'marcelo'
@@ -387,7 +398,8 @@ export default function CollectionDetailPage() {
     setCollection(prev => prev ? { ...prev, ...updates } : prev)
   }
 
-  const vol = Array.from({ length: collection.total_volumes }, (_, i) => i + 1)
+  const maxVol = allComics.length > 0 ? Math.max(...allComics.map(c => c.issue_number ?? c.volume ?? 0)) : 0
+  const vol = Array.from({ length: collection.total_volumes ?? maxVol }, (_, i) => i + 1)
 
   return (
     <>
@@ -464,7 +476,7 @@ export default function CollectionDetailPage() {
               <div className="space-y-2 pt-1">
                 {(['marcelo', 'walter'] as Owner[]).map((owner) => {
                   const owned = owner === 'marcelo' ? marceloOwned : walterOwned
-                  const pct   = Math.min(100, collection.total_volumes > 0 ? (owned.size / collection.total_volumes) * 100 : 0)
+                  const pct   = collection.total_volumes ? Math.min(100, (owned.size / collection.total_volumes) * 100) : 0
                   return (
                     <div key={owner}>
                       <div className="flex items-center justify-between mb-0.5">
@@ -472,7 +484,7 @@ export default function CollectionDetailPage() {
                           {owner}
                         </span>
                         <span className="font-comic text-[11px] text-muted-foreground tabular-nums">
-                          {owned.size}/{collection.total_volumes}
+                          {owned.size}{collection.total_volumes ? `/${collection.total_volumes}` : ' / ?'}
                         </span>
                       </div>
                       <div className="h-2 bg-muted rounded-sm border border-foreground/20 overflow-hidden">
@@ -513,7 +525,7 @@ export default function CollectionDetailPage() {
         <div className="border-2 border-foreground/70 rounded-sm overflow-hidden shadow-[3px_3px_0px_rgba(0,0,0,0.5)]">
           <div className="px-4 py-2.5 border-b-2 border-foreground/70" style={{ background: s.bg }}>
             <span className="font-comic text-sm uppercase tracking-[0.18em] text-white">
-              Volumes · {collection.total_volumes} total
+              Volumes{collection.total_volumes ? ` · ${collection.total_volumes} total` : ' · em andamento'}
             </span>
           </div>
           <div className="p-4">

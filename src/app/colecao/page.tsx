@@ -86,15 +86,15 @@ export default function ColecaoPage() {
       case 'za':             return b.name.localeCompare(a.name, 'pt')
       case 'progresso_desc': {
         const u = user ?? 'marcelo'
-        const aPct = a.total_volumes > 0
+        const aPct = a.total_volumes
           ? comics.filter(c => (c.series ?? c.title) === a.name && (c.owner === u || c.owner === 'ambos')).length / a.total_volumes
           : 0
-        const bPct = b.total_volumes > 0
+        const bPct = b.total_volumes
           ? comics.filter(c => (c.series ?? c.title) === b.name && (c.owner === u || c.owner === 'ambos')).length / b.total_volumes
           : 0
         return bPct - aPct
       }
-      case 'volumes_desc':   return b.total_volumes - a.total_volumes
+      case 'volumes_desc':   return (b.total_volumes ?? 0) - (a.total_volumes ?? 0)
     }
   })
 
@@ -319,7 +319,7 @@ function CollectionCard({ collection, comics, pubBg, user }: { collection: Colle
   const owned = comics.filter(
     (c) => (c.series ?? c.title) === collection.name && (c.owner === user || c.owner === 'ambos')
   ).length
-  const pct   = Math.min(100, collection.total_volumes > 0 ? (owned / collection.total_volumes) * 100 : 0)
+  const pct   = collection.total_volumes ? Math.min(100, (owned / collection.total_volumes) * 100) : 0
 
   return (
     <Link href={`/colecao/c/${collection.id}`} className="group block">
@@ -364,7 +364,7 @@ function CollectionCard({ collection, comics, pubBg, user }: { collection: Colle
               {collection.name}
             </p>
             <p className="font-comic text-[10px] text-white/70">
-              {owned}/{collection.total_volumes}
+              {owned}{collection.total_volumes ? `/${collection.total_volumes}` : ''}
             </p>
           </div>
           {/* Progress bar */}

@@ -49,7 +49,7 @@ function NovaColecaoForm() {
         name:          name.trim(),
         publisher:     publisher.trim() || null,
         cover_url:     previewOk ? coverUrl.trim() : null,
-        total_volumes: parseInt(totalVolumes) || 1,
+        total_volumes: totalVolumes.trim() ? parseInt(totalVolumes) : null,
         created_by:    (user as Owner) ?? 'marcelo',
         description:   description.trim() || null,
         omnibus,
@@ -161,14 +161,16 @@ function NovaColecaoForm() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="font-comic text-[11px] uppercase tracking-widest">Total de volumes</Label>
+              <Label className="font-comic text-[11px] uppercase tracking-widest">
+                Total de volumes <span className="text-muted-foreground normal-case font-sans text-[10px]">(opcional)</span>
+              </Label>
               <Input
                 type="number"
                 min="1"
                 max="9999"
                 value={totalVolumes}
                 onChange={(e) => setTotalVolumes(e.target.value)}
-                placeholder="Ex: 12"
+                placeholder="Em aberto"
                 className="rounded-sm border-2 border-foreground/40 h-9 w-32"
               />
             </div>

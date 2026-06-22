@@ -99,7 +99,7 @@ export interface Collection {
   name: string              // matches comic.series
   publisher: string | null
   cover_url: string | null
-  total_volumes: number
+  total_volumes: number | null
   created_by: Owner
   description: string | null
   omnibus: boolean
