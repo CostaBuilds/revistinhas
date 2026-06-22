@@ -18,6 +18,7 @@ export const mockComics: Comic[] = [
     notes: 'Edição nacional antiga, capa dura',
     read: true,
     language: 'pt',
+    omnibus: false,
   },
   {
     id: '2',
@@ -36,6 +37,7 @@ export const mockComics: Comic[] = [
     notes: null,
     read: true,
     language: 'en',
+    omnibus: false,
   },
   {
     id: '3',
@@ -54,6 +56,7 @@ export const mockComics: Comic[] = [
     notes: 'Primeira aparição do Venom',
     read: true,
     language: 'en',
+    omnibus: false,
   },
   {
     id: '4',
@@ -72,6 +75,7 @@ export const mockComics: Comic[] = [
     notes: null,
     read: false,
     language: 'en',
+    omnibus: false,
   },
   {
     id: '5',
@@ -90,6 +94,7 @@ export const mockComics: Comic[] = [
     notes: 'TPB compartilhada',
     read: true,
     language: 'en',
+    omnibus: false,
   },
   {
     id: '6',
@@ -108,6 +113,7 @@ export const mockComics: Comic[] = [
     notes: null,
     read: true,
     language: 'pt',
+    omnibus: false,
   },
   {
     id: '7',
@@ -126,6 +132,7 @@ export const mockComics: Comic[] = [
     notes: null,
     read: true,
     language: 'en',
+    omnibus: false,
   },
   {
     id: '8',
@@ -144,6 +151,7 @@ export const mockComics: Comic[] = [
     notes: null,
     read: true,
     language: 'en',
+    omnibus: false,
   },
 ]
 
@@ -251,6 +259,7 @@ export const mockCollections: Collection[] = [
     total_volumes: 12,
     created_by: 'marcelo',
     description: 'Série original de 12 edições de Alan Moore e Dave Gibbons (1986–1987)',
+    omnibus: false,
   },
   {
     id: 'col2',
@@ -261,6 +270,7 @@ export const mockCollections: Collection[] = [
     total_volumes: 3,
     created_by: 'marcelo',
     description: 'Batman: O Cavaleiro das Trevas — Frank Miller',
+    omnibus: false,
   },
   {
     id: 'col3',
@@ -271,6 +281,7 @@ export const mockCollections: Collection[] = [
     total_volumes: 10,
     created_by: 'ambos',
     description: 'Coletânea em volumes encadernados — Neil Gaiman',
+    omnibus: false,
   },
   {
     id: 'col4',
@@ -281,6 +292,7 @@ export const mockCollections: Collection[] = [
     total_volumes: 441,
     created_by: 'walter',
     description: 'Edições originais da série clássica',
+    omnibus: false,
   },
   {
     id: 'col5',
@@ -291,6 +303,7 @@ export const mockCollections: Collection[] = [
     total_volumes: 279,
     created_by: 'walter',
     description: 'Série clássica dos X-Men',
+    omnibus: false,
   },
   {
     id: 'col6',
@@ -301,6 +314,7 @@ export const mockCollections: Collection[] = [
     total_volumes: 83,
     created_by: 'marcelo',
     description: 'Manga brasileiro da turma da Mônica em estilo mangá',
+    omnibus: false,
   },
 ]
 

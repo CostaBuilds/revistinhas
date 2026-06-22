@@ -32,6 +32,7 @@ export interface Comic {
   cover_url: string | null
   notes: string | null
   read: boolean
+  omnibus: boolean
   language: string
 }
 
@@ -101,6 +102,7 @@ export interface Collection {
   total_volumes: number
   created_by: Owner
   description: string | null
+  omnibus: boolean
 }
 
 export type EventoTipo = 'lancamento' | 'pre_venda' | 'saldao' | 'evento' | 'feira' | 'sorteio'

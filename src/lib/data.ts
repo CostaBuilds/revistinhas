@@ -58,7 +58,7 @@ export async function acquireWishlistItem(id: string): Promise<void> {
     issue_number: item.issue_number, volume: item.volume,
     publisher: item.publisher, year: null, condition: null,
     purchase_price: item.estimated_price, current_value: item.estimated_price,
-    owner: item.owner, cover_url: null, notes: item.notes, read: false, language: 'pt',
+    owner: item.owner, cover_url: null, notes: item.notes, read: false, omnibus: false, language: 'pt',
   })
   await deleteWishlistItem(id)
 }

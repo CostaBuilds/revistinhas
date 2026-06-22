@@ -17,6 +17,7 @@ import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 
 // ─── Publisher map ────────────────────────────────────────────────
 const PUB: Record<string, { Icon: LucideIcon; bg: string }> = {
@@ -85,6 +86,7 @@ function CopyModal({
             cover_url:      null,
             notes:          null,
             read:           false,
+            omnibus:        false,
             language:       'pt',
           })
         }
@@ -196,62 +198,151 @@ function CopyModal({
   )
 }
 
-// ─── Edit cover modal ─────────────────────────────────────────────
-function EditCoverModal({ collection, onSave, onClose }: {
+const KNOWN_PUBLISHERS = [
+  'DC Comics', 'Marvel Comics', 'Panini', 'DC/Vertigo',
+  'Image Comics', 'Pipoca & Nanquim', 'Mythos', 'Darkside Books', 'Abril',
+]
+
+// ─── Edit collection modal ─────────────────────────────────────────
+function EditCollectionModal({ collection, onSave, onClose }: {
   collection: Collection
-  onSave: (url: string) => void
+  onSave: (updates: Partial<Collection>) => Promise<void>
   onClose: () => void
 }) {
-  const [url,       setUrl]       = useState(collection.cover_url ?? '')
-  const [previewOk, setPreviewOk] = useState(false)
+  const [name,         setName]         = useState(collection.name)
+  const [publisher,    setPublisher]     = useState(collection.publisher ?? '')
+  const [totalVolumes, setTotalVolumes]  = useState(String(collection.total_volumes))
+  const [description,  setDescription]   = useState(collection.description ?? '')
+  const [coverUrl,     setCoverUrl]      = useState(collection.cover_url ?? '')
+  const [omnibus,      setOmnibus]       = useState(collection.omnibus)
+  const [previewOk,    setPreviewOk]     = useState(false)
+  const [saving,       setSaving]        = useState(false)
 
   useEffect(() => {
-    if (!url) { setPreviewOk(false); return }
+    if (!coverUrl) { setPreviewOk(false); return }
     const img = new window.Image()
     img.onload  = () => setPreviewOk(true)
     img.onerror = () => setPreviewOk(false)
-    img.src = url
-  }, [url])
+    img.src = coverUrl
+  }, [coverUrl])
+
+  async function handleSave() {
+    if (!name.trim()) return
+    setSaving(true)
+    try {
+      await onSave({
+        name:          name.trim(),
+        publisher:     publisher.trim() || null,
+        total_volumes: parseInt(totalVolumes) || 1,
+        description:   description.trim() || null,
+        cover_url:     previewOk || (!coverUrl && !collection.cover_url) ? (coverUrl.trim() || null) : collection.cover_url,
+        omnibus,
+      })
+      onClose()
+    } catch (err) {
+      console.error('Erro ao salvar coleção:', err)
+      setSaving(false)
+      alert('Erro: ' + (err as Error).message)
+    }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-foreground/50" onClick={onClose} />
-      <div className="relative border-2 border-foreground/80 bg-card rounded-sm shadow-[6px_6px_0px_rgba(0,0,0,0.7)] w-full max-w-sm overflow-hidden">
-        <div className="px-4 py-3 border-b-2 border-foreground/70 bg-[#0476F2]">
-          <p className="font-comic text-sm uppercase tracking-widest text-white">Editar capa</p>
+      <div className="relative border-2 border-foreground/80 bg-card rounded-sm shadow-[6px_6px_0px_rgba(0,0,0,0.7)] w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
+        {/* Header */}
+        <div className="px-4 py-3 border-b-2 border-foreground/70 bg-primary shrink-0 flex items-center justify-between">
+          <p className="font-comic text-sm uppercase tracking-widest text-white">Editar Coleção</p>
+          <button onClick={onClose} className="text-white/70 hover:text-white p-1"><X size={16} /></button>
         </div>
-        <div className="p-4 space-y-4">
-          {/* Preview */}
+
+        {/* Body */}
+        <div className="p-4 overflow-y-auto flex-1 space-y-4">
+          {/* Cover + URL */}
           <div className="flex gap-3 items-start">
             <div className="w-20 aspect-[2/3] border-2 border-foreground/40 rounded-sm overflow-hidden shrink-0 bg-muted/40 flex items-center justify-center">
-              {previewOk
-                ? <img src={url} alt="Preview" className="w-full h-full object-cover" />
-                : <BookOpen size={20} className="text-muted-foreground opacity-30" />
-              }
+              {previewOk || (coverUrl && collection.cover_url === coverUrl)
+                ? <img src={coverUrl} alt="Capa" className="w-full h-full object-cover" />
+                : <BookOpen size={20} className="text-muted-foreground opacity-30" />}
             </div>
-            <div className="flex-1 space-y-2">
-              <Label className="font-comic text-[11px] uppercase tracking-widest">URL da imagem</Label>
-              <Input
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                placeholder="https://…"
-                className="rounded-sm border-2 border-foreground/40 h-9"
-                autoFocus
-              />
+            <div className="flex-1 space-y-1.5">
+              <Label className="font-comic text-[10px] uppercase tracking-widest">URL da capa</Label>
+              <Input value={coverUrl} onChange={(e) => setCoverUrl(e.target.value)}
+                placeholder="https://…" className="rounded-sm border-2 border-foreground/40 h-8 text-sm" />
               <p className="text-[10px] text-muted-foreground">jpg, png, webp…</p>
             </div>
           </div>
-          <div className="flex gap-2">
-            <button
-              onClick={() => onSave(url)}
-              className="flex-1 py-2 font-comic text-sm uppercase tracking-widest rounded-sm border-2 border-foreground/70 bg-primary text-primary-foreground shadow-[3px_3px_0px_rgba(0,0,0,0.5)] active:shadow-none active:translate-x-[3px] active:translate-y-[3px]"
-            >
-              Salvar
-            </button>
-            <button onClick={onClose} className={cn(buttonVariants({ variant: 'outline' }), 'rounded-sm border-2 border-foreground/50')}>
-              Cancelar
-            </button>
+
+          {/* Nome */}
+          <div className="space-y-1.5">
+            <Label className="font-comic text-[10px] uppercase tracking-widest">Nome da série *</Label>
+            <Input value={name} onChange={(e) => setName(e.target.value)} required
+              className="rounded-sm border-2 border-foreground/40 h-9" autoFocus />
           </div>
+
+          {/* Editora */}
+          <div className="space-y-1.5">
+            <Label className="font-comic text-[10px] uppercase tracking-widest">Editora</Label>
+            <Input value={publisher} onChange={(e) => setPublisher(e.target.value)}
+              placeholder="DC Comics, Marvel…" list="edit-pub-list"
+              className="rounded-sm border-2 border-foreground/40 h-9" />
+            <datalist id="edit-pub-list">
+              {KNOWN_PUBLISHERS.map((p) => <option key={p} value={p} />)}
+            </datalist>
+            <div className="flex flex-wrap gap-1.5">
+              {KNOWN_PUBLISHERS.slice(0, 5).map((p) => (
+                <button key={p} type="button" onClick={() => setPublisher(p)}
+                  className={cn(
+                    'px-2 py-0.5 text-[10px] font-medium rounded-sm border transition-colors',
+                    publisher === p ? 'border-foreground/60 bg-foreground text-background' : 'border-foreground/30 hover:border-foreground/50'
+                  )}>
+                  {p}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Total de volumes */}
+          <div className="space-y-1.5">
+            <Label className="font-comic text-[10px] uppercase tracking-widest">Total de volumes</Label>
+            <Input type="number" min="1" max="9999" value={totalVolumes}
+              onChange={(e) => setTotalVolumes(e.target.value)}
+              className="rounded-sm border-2 border-foreground/40 h-9 w-28" />
+          </div>
+
+          {/* Descrição */}
+          <div className="space-y-1.5">
+            <Label className="font-comic text-[10px] uppercase tracking-widest">Descrição</Label>
+            <Textarea value={description} onChange={(e) => setDescription(e.target.value)}
+              placeholder="Alan Moore, 1986–87… (opcional)" rows={2}
+              className="rounded-sm border-2 border-foreground/40 resize-none text-sm" />
+          </div>
+
+          {/* Omnibus */}
+          <div className="flex items-center gap-2">
+            <input type="checkbox" id="omnibus-edit-col" checked={omnibus}
+              onChange={(e) => setOmnibus(e.target.checked)} className="h-4 w-4 rounded" />
+            <Label htmlFor="omnibus-edit-col" className="text-sm font-normal cursor-pointer">
+              Omnibus <span className="text-[10px] text-yellow-500 font-comic">(edição que coleta múltiplos volumes)</span>
+            </Label>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-4 py-3 border-t-2 border-foreground/70 flex gap-2 shrink-0">
+          <button
+            onClick={handleSave}
+            disabled={!name.trim() || saving}
+            className={cn(
+              'flex-1 py-2 font-comic text-sm uppercase tracking-widest rounded-sm border-2 border-foreground/70 transition-all shadow-[3px_3px_0px_rgba(0,0,0,0.5)] active:shadow-none active:translate-x-[3px] active:translate-y-[3px]',
+              name.trim() && !saving ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground cursor-not-allowed'
+            )}
+          >
+            {saving ? 'Salvando…' : 'Salvar'}
+          </button>
+          <button onClick={onClose} className={cn(buttonVariants({ variant: 'outline' }), 'rounded-sm border-2 border-foreground/50')}>
+            Cancelar
+          </button>
         </div>
       </div>
     </div>
@@ -264,10 +355,10 @@ export default function CollectionDetailPage() {
   const router            = useRouter()
   const { user }          = useAuth()
 
-  const [collection, setCollection] = useState<Collection | null>(null)
-  const [comics,     setComics]     = useState<Comic[]>([])
-  const [showCopy,   setShowCopy]   = useState(false)
-  const [showEdit,   setShowEdit]   = useState(false)
+  const [collection,  setCollection]  = useState<Collection | null>(null)
+  const [comics,      setComics]      = useState<Comic[]>([])
+  const [showCopy,    setShowCopy]    = useState(false)
+  const [showEdit,    setShowEdit]    = useState(false)
 
   useEffect(() => {
     getCollections().then((cols) => setCollection(cols.find((c) => c.id === id) ?? null))
@@ -304,15 +395,9 @@ export default function CollectionDetailPage() {
     }
   }
 
-  async function handleSaveCover(url: string) {
-    try {
-      await updateCollection(id, { cover_url: url || null })
-      setCollection(prev => prev ? { ...prev, cover_url: url || null } : prev)
-      setShowEdit(false)
-    } catch (err) {
-      console.error('Erro ao salvar capa:', err)
-      alert('Erro: ' + (err as Error).message)
-    }
+  async function handleSaveCollection(updates: Partial<Collection>) {
+    await updateCollection(id, updates)
+    setCollection(prev => prev ? { ...prev, ...updates } : prev)
   }
 
   const vol = Array.from({ length: collection.total_volumes }, (_, i) => i + 1)
@@ -341,7 +426,7 @@ export default function CollectionDetailPage() {
                 onClick={() => setShowEdit(true)}
                 className="flex items-center gap-1 text-white/80 hover:text-white transition-colors text-[10px] font-comic uppercase tracking-wider"
               >
-                <Pencil size={10} /> Capa
+                <Pencil size={10} /> Editar
               </button>
               <button
                 onClick={handleDelete}
@@ -360,7 +445,7 @@ export default function CollectionDetailPage() {
               className="w-28 aspect-[2/3] border-2 border-foreground/40 rounded-sm overflow-hidden shrink-0 flex items-center justify-center cursor-pointer hover:opacity-90 transition-opacity"
               style={{ background: s.bg + '15' }}
               onClick={() => setShowEdit(true)}
-              title="Clique para editar a capa"
+              title="Clique para editar a coleção"
             >
               {collection.cover_url ? (
                 <img src={collection.cover_url} alt={collection.name} className="w-full h-full object-cover" />
@@ -375,7 +460,14 @@ export default function CollectionDetailPage() {
             {/* Info */}
             <div className="flex-1 min-w-0 space-y-2">
               <div>
-                <h1 className="font-comic text-[1.6rem] leading-none uppercase tracking-[0.05em]">{collection.name}</h1>
+                <div className="flex items-start gap-2 flex-wrap">
+                  <h1 className="font-comic text-[1.6rem] leading-none uppercase tracking-[0.05em]">{collection.name}</h1>
+                  {collection.omnibus && (
+                    <span className="shrink-0 mt-1 bg-yellow-400 text-yellow-950 font-comic text-[8px] uppercase tracking-wide px-2 py-0.5 border border-yellow-600 leading-none">
+                      omnibus
+                    </span>
+                  )}
+                </div>
                 {collection.description && (
                   <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{collection.description}</p>
                 )}
@@ -477,6 +569,11 @@ export default function CollectionDetailPage() {
                               {both ? 'M+W' : mHas ? 'M' : 'W'}
                             </span>
                           )}
+                          {comic?.omnibus && (
+                            <span className="absolute top-0 right-0 bg-yellow-400 text-yellow-950 font-comic text-[6px] uppercase px-1 py-0.5 leading-none border-l border-b border-yellow-600">
+                              OT
+                            </span>
+                          )}
                         </>
                       ) : (
                         <>
@@ -484,6 +581,11 @@ export default function CollectionDetailPage() {
                           {(mHas || wHas) && (
                             <span className="text-[8px] leading-none opacity-70">
                               {both ? 'M+W' : mHas ? 'M' : 'W'}
+                            </span>
+                          )}
+                          {comic?.omnibus && (
+                            <span className="absolute top-0 right-0 bg-yellow-400 text-yellow-950 font-comic text-[6px] uppercase px-1 py-0.5 leading-none border-l border-b border-yellow-600">
+                              OT
                             </span>
                           )}
                         </>
@@ -539,9 +641,16 @@ export default function CollectionDetailPage() {
                         </div>
                       )}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{comic.title}</p>
-                      {comic.year && <p className="text-[10px] text-muted-foreground">{comic.year}</p>}
+                    <div className="flex-1 min-w-0 flex items-center gap-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{comic.title}</p>
+                        {comic.year && <p className="text-[10px] text-muted-foreground">{comic.year}</p>}
+                      </div>
+                      {comic.omnibus && (
+                        <span className="shrink-0 bg-yellow-400 text-yellow-950 font-comic text-[7px] uppercase tracking-wide px-1.5 py-0.5 border border-yellow-600 leading-none">
+                          omnibus
+                        </span>
+                      )}
                     </div>
                     <span className={cn('font-comic text-sm shrink-0', ownerColor(comic.owner))}>
                       {comic.owner === 'ambos' ? 'M+W' : comic.owner === 'marcelo' ? 'M' : 'W'}
@@ -570,9 +679,9 @@ export default function CollectionDetailPage() {
         />
       )}
       {showEdit && (
-        <EditCoverModal
+        <EditCollectionModal
           collection={collection}
-          onSave={handleSaveCover}
+          onSave={handleSaveCollection}
           onClose={() => setShowEdit(false)}
         />
       )}

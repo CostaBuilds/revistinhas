@@ -42,6 +42,10 @@ export default function ColecaoPage() {
   const [listView, setListView]     = useState(false)
 
   useEffect(() => {
+    if (user) setOwnerFilter(user)
+  }, [user])
+
+  useEffect(() => {
     if (!user) return
     getComics().then(setComics)
     getCollections().then(setCollections)
@@ -264,6 +268,12 @@ function CollectionCard({ collection, comics, pubBg, user }: { collection: Colle
               </div>
             </div>
           )}
+          {/* Omnibus badge */}
+          {collection.omnibus && (
+            <span className="absolute bottom-1 right-1 bg-yellow-400 text-yellow-950 font-comic text-[7px] uppercase tracking-wide px-1.5 py-0.5 border border-yellow-600 shadow-[1px_1px_0px_rgba(0,0,0,0.4)] leading-none">
+              omnibus
+            </span>
+          )}
         </div>
 
         {/* Bottom info strip */}
@@ -311,9 +321,16 @@ function HqListView({ comics }: { comics: Comic[] }) {
               <div className="h-7 w-7 rounded-sm flex items-center justify-center border border-foreground/20" style={{ background: s.bg + '20' }}>
                 <s.Icon size={12} style={{ color: s.bg }} />
               </div>
-              <div className="min-w-0">
-                <p className="text-sm font-medium truncate">{comic.title}</p>
-                <p className="text-[10px] text-muted-foreground">{[comic.publisher, comic.year].filter(Boolean).join(' · ')}</p>
+              <div className="min-w-0 flex items-center gap-2">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">{comic.title}</p>
+                  <p className="text-[10px] text-muted-foreground">{[comic.publisher, comic.year].filter(Boolean).join(' · ')}</p>
+                </div>
+                {comic.omnibus && (
+                  <span className="shrink-0 bg-yellow-400 text-yellow-950 font-comic text-[7px] uppercase tracking-wide px-1.5 py-0.5 border border-yellow-600 leading-none">
+                    omnibus
+                  </span>
+                )}
               </div>
               <span className={cn('font-comic text-sm w-16 text-center shrink-0', ownerColor(comic.owner))}>
                 {comic.owner === 'ambos' ? 'Ambos' : comic.owner === 'marcelo' ? 'M' : 'W'}
@@ -354,6 +371,11 @@ function HqGridView({ comics }: { comics: Comic[] }) {
                 <p className="font-comic text-[10px] uppercase tracking-wide text-white leading-tight line-clamp-2">{comic.title}</p>
                 <p className={cn('font-comic text-[9px] text-white/70 mt-0.5')}>{formatCurrency(comic.current_value)}</p>
               </div>
+              {comic.omnibus && (
+                <span className="absolute bottom-9 right-1 bg-yellow-400 text-yellow-950 font-comic text-[7px] uppercase tracking-wide px-1.5 py-0.5 border border-yellow-600 shadow-[1px_1px_0px_rgba(0,0,0,0.4)] leading-none">
+                  omnibus
+                </span>
+              )}
             </div>
           </Link>
         )

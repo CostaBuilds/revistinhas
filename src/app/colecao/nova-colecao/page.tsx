@@ -28,6 +28,7 @@ function NovaColecaoForm() {
   const [coverUrl,     setCoverUrl]      = useState('')
   const [totalVolumes, setTotalVolumes]  = useState('')
   const [description,  setDescription]   = useState('')
+  const [omnibus,      setOmnibus]       = useState(false)
   const [saving,       setSaving]        = useState(false)
   const [previewOk,    setPreviewOk]     = useState(false)
 
@@ -51,6 +52,7 @@ function NovaColecaoForm() {
         total_volumes: parseInt(totalVolumes) || 1,
         created_by:    (user as Owner) ?? 'marcelo',
         description:   description.trim() || null,
+        omnibus,
       })
       router.push('/colecao')
     } catch (err) {
@@ -180,6 +182,18 @@ function NovaColecaoForm() {
                 rows={2}
                 className="rounded-sm border-2 border-foreground/40 resize-none text-sm"
               />
+            </div>
+
+            <div className="flex items-center gap-2 pt-1">
+              <input
+                type="checkbox" id="omnibus-new"
+                checked={omnibus}
+                onChange={(e) => setOmnibus(e.target.checked)}
+                className="h-4 w-4 rounded"
+              />
+              <Label htmlFor="omnibus-new" className="text-sm font-normal cursor-pointer">
+                Omnibus <span className="text-[10px] text-yellow-500 font-comic">(edição que coleta múltiplos volumes)</span>
+              </Label>
             </div>
           </div>
         </div>

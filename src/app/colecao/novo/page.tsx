@@ -49,7 +49,7 @@ function NovoComicForm() {
       title: series && issue ? `${series} #${issue}` : '',
       series, issue_number: issue, volume: '', publisher: pub,
       year: '', condition: '', purchase_price: '', purchase_price_marcelo: '', purchase_price_walter: '', current_value: '',
-      owner: 'marcelo', cover_url: '', notes: '', read: false, language: 'pt',
+      owner: 'marcelo', cover_url: '', notes: '', read: false, omnibus: false, language: 'pt',
     }
   })
 
@@ -78,6 +78,7 @@ function NovoComicForm() {
         cover_url: form.cover_url.trim() || null,
         notes: form.notes.trim() || null,
         read: form.read,
+        omnibus: form.omnibus as boolean,
         language: form.language,
       })
       router.push('/colecao')
@@ -144,9 +145,17 @@ function NovoComicForm() {
             <Select label="Dono" value={form.owner} onChange={(v) => set('owner', v)} options={OWNERS} />
             <Input label="URL da capa" type="url" value={form.cover_url} onChange={(e) => set('cover_url', e.target.value)} placeholder="https://…" />
             <Textarea label="Notas" value={form.notes} onChange={(e) => set('notes', e.target.value)} placeholder="Anotações…" />
-            <div className="flex items-center gap-2">
-              <input type="checkbox" id="read" checked={form.read} onChange={(e) => set('read', e.target.checked)} className="h-4 w-4 rounded" />
-              <Label htmlFor="read" className="text-sm font-normal cursor-pointer">Já li</Label>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="read" checked={form.read} onChange={(e) => set('read', e.target.checked)} className="h-4 w-4 rounded" />
+                <Label htmlFor="read" className="text-sm font-normal cursor-pointer">Já li</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="omnibus" checked={form.omnibus as boolean} onChange={(e) => set('omnibus', e.target.checked)} className="h-4 w-4 rounded" />
+                <Label htmlFor="omnibus" className="text-sm font-normal cursor-pointer">
+                  Omnibus <span className="text-[10px] text-yellow-500 font-comic">(OT)</span>
+                </Label>
+              </div>
             </div>
           </CardContent>
         </Card>

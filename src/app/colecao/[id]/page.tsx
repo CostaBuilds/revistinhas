@@ -136,6 +136,9 @@ export default function ComicDetailPage({ params }: { params: Promise<{ id: stri
                     {comic.read && (
                       <Badge variant="secondary" className="text-xs">Lido</Badge>
                     )}
+                    {comic.omnibus && (
+                      <Badge className="text-xs bg-yellow-400 text-yellow-950 border border-yellow-600 hover:bg-yellow-400">Omnibus</Badge>
+                    )}
                   </div>
                   <div className="text-sm space-y-1.5">
                     {[
@@ -226,9 +229,17 @@ export default function ComicDetailPage({ params }: { params: Promise<{ id: stri
             <Input label="Valor atual (R$)" type="text" value={String(form.current_value ?? '')} onChange={(e) => set('current_value', e.target.value)} />
             <Input label="URL da capa" type="url" value={form.cover_url ?? ''} onChange={(e) => set('cover_url', e.target.value)} />
             <Textarea label="Notas" value={form.notes ?? ''} onChange={(e) => set('notes', e.target.value)} />
-            <div className="flex items-center gap-2">
-              <input type="checkbox" id="read-edit" checked={form.read ?? false} onChange={(e) => set('read', e.target.checked)} className="h-4 w-4 rounded" />
-              <Label htmlFor="read-edit" className="text-sm font-normal cursor-pointer">Já li</Label>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="read-edit" checked={form.read ?? false} onChange={(e) => set('read', e.target.checked)} className="h-4 w-4 rounded" />
+                <Label htmlFor="read-edit" className="text-sm font-normal cursor-pointer">Já li</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <input type="checkbox" id="omnibus-edit" checked={form.omnibus ?? false} onChange={(e) => set('omnibus', e.target.checked)} className="h-4 w-4 rounded" />
+                <Label htmlFor="omnibus-edit" className="text-sm font-normal cursor-pointer">
+                  Omnibus <span className="text-[10px] text-yellow-500 font-comic">(OT)</span>
+                </Label>
+              </div>
             </div>
           </CardContent>
         </Card>
