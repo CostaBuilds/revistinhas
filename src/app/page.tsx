@@ -676,6 +676,28 @@ export default function DashboardPage() {
         </p>
       </div>
 
+      {/* Banner */}
+      <div className="relative w-full overflow-hidden rounded-sm border-2 border-foreground/70 shadow-[4px_4px_0px_rgba(0,0,0,0.55)]" style={{ aspectRatio: '5/1' }}>
+        <img
+          src="/banner.jpg"
+          alt="Banner"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+        />
+        {/* Fallback gradient shown behind image */}
+        <div
+          className="absolute inset-0"
+          style={{ background: 'linear-gradient(135deg, oklch(0.11 0.055 258) 0%, oklch(0.20 0.09 258) 40%, oklch(0.82 0.185 93 / 0.15) 100%)' }}
+        />
+        {/* Diagonal stripe overlay */}
+        <div
+          className="absolute inset-0 opacity-[0.06]"
+          style={{ backgroundImage: 'repeating-linear-gradient(45deg, currentColor 0, currentColor 1px, transparent 0, transparent 50%)', backgroundSize: '12px 12px' }}
+        />
+        {/* Left accent bar */}
+        <div className="absolute left-0 inset-y-0 w-1.5" style={{ background: 'oklch(0.82 0.185 93)' }} />
+      </div>
+
       {/* Stats row */}
       <div className="grid grid-cols-2 xl:grid-cols-4 gap-3">
         <StatsCard
