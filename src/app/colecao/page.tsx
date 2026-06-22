@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Plus, Search, LayoutGrid, List, BookOpen, Copy } from 'lucide-react'
+import { Plus, Search, LayoutGrid, List, BookOpen, Copy, ArrowUpDown } from 'lucide-react'
 import { Comic, Collection, Owner } from '@/types'
 import { getComics, getCollections } from '@/lib/data'
 import { useAuth } from '@/context/auth'
@@ -31,6 +31,27 @@ const PUB_DEFAULT = { Icon: BookOpen, bg: '#64748b' }
 function pubStyle(pub: string) { return PUB[pub] ?? PUB_DEFAULT }
 
 type Tab = 'colecoes' | 'hqs'
+type ColSort = 'insercao_desc' | 'insercao_asc' | 'az' | 'za' | 'progresso_desc' | 'volumes_desc'
+type HqSort  = 'insercao_desc' | 'insercao_asc' | 'az' | 'za' | 'ano_desc' | 'ano_asc' | 'valor_desc' | 'numero_asc'
+
+const COL_SORT_LABELS: Record<ColSort, string> = {
+  insercao_desc:  'Mais recentes',
+  insercao_asc:   'Mais antigas',
+  az:             'A → Z',
+  za:             'Z → A',
+  progresso_desc: 'Mais completas',
+  volumes_desc:   'Mais volumes',
+}
+const HQ_SORT_LABELS: Record<HqSort, string> = {
+  insercao_desc: 'Mais recentes',
+  insercao_asc:  'Mais antigas',
+  az:            'A → Z',
+  za:            'Z → A',
+  ano_desc:      'Ano ↓',
+  ano_asc:       'Ano ↑',
+  valor_desc:    'Maior valor',
+  numero_asc:    'Número ↑',
+}
 
 export default function ColecaoPage() {
   const { user }                    = useAuth()
@@ -40,6 +61,8 @@ export default function ColecaoPage() {
   const [ownerFilter, setOwnerFilter] = useState<Owner | 'todos'>('todos')
   const [tab, setTab]               = useState<Tab>('colecoes')
   const [listView, setListView]     = useState(false)
+  const [colSort, setColSort]       = useState<ColSort>('az')
+  const [hqSort, setHqSort]         = useState<HqSort>('az')
 
   useEffect(() => {
     if (user) setOwnerFilter(user)
@@ -55,8 +78,39 @@ export default function ColecaoPage() {
   const filteredCols = collections.filter((col) => {
     const q = search.toLowerCase()
     const matchSearch = !q || col.name.toLowerCase().includes(q) || (col.publisher ?? '').toLowerCase().includes(q)
-    const matchOwner  = ownerFilter === 'todos' || col.created_by === ownerFilter || col.created_by === 'ambos'
+    let matchOwner: boolean
+    if (ownerFilter === 'todos') {
+      matchOwner = true
+    } else {
+      const createdByUser = col.created_by === ownerFilter || col.created_by === 'ambos'
+      const hasVolumes    = comics.some(c =>
+        (c.series ?? c.title) === col.name &&
+        (c.owner === ownerFilter || c.owner === 'ambos')
+      )
+      matchOwner = createdByUser || hasVolumes
+    }
     return matchSearch && matchOwner
+  })
+
+  // ── Sorted collections ────────────────────────────────────────
+  const sortedCols = [...filteredCols].sort((a, b) => {
+    switch (colSort) {
+      case 'insercao_desc':  return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      case 'insercao_asc':   return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      case 'az':             return a.name.localeCompare(b.name, 'pt')
+      case 'za':             return b.name.localeCompare(a.name, 'pt')
+      case 'progresso_desc': {
+        const u = user ?? 'marcelo'
+        const aPct = a.total_volumes > 0
+          ? comics.filter(c => (c.series ?? c.title) === a.name && (c.owner === u || c.owner === 'ambos')).length / a.total_volumes
+          : 0
+        const bPct = b.total_volumes > 0
+          ? comics.filter(c => (c.series ?? c.title) === b.name && (c.owner === u || c.owner === 'ambos')).length / b.total_volumes
+          : 0
+        return bPct - aPct
+      }
+      case 'volumes_desc':   return b.total_volumes - a.total_volumes
+    }
   })
 
   // ── Filtered HQs ─────────────────────────────────────────────
@@ -67,8 +121,22 @@ export default function ColecaoPage() {
     return matchSearch && matchOwner
   })
 
-  // ── Group collections by publisher ────────────────────────────
-  const byPublisher = filteredCols.reduce<Record<string, Collection[]>>((acc, col) => {
+  // ── Sorted HQs ───────────────────────────────────────────────
+  const sortedHqs = [...filteredHqs].sort((a, b) => {
+    switch (hqSort) {
+      case 'insercao_desc': return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      case 'insercao_asc':  return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      case 'az':            return a.title.localeCompare(b.title, 'pt')
+      case 'za':            return b.title.localeCompare(a.title, 'pt')
+      case 'ano_desc':      return (b.year ?? 0) - (a.year ?? 0)
+      case 'ano_asc':       return (a.year ?? 0) - (b.year ?? 0)
+      case 'valor_desc':    return (b.current_value ?? 0) - (a.current_value ?? 0)
+      case 'numero_asc':    return (a.issue_number ?? a.volume ?? 0) - (b.issue_number ?? b.volume ?? 0)
+    }
+  })
+
+  // ── Group sorted collections by publisher ─────────────────────
+  const byPublisher = sortedCols.reduce<Record<string, Collection[]>>((acc, col) => {
     const pub = col.publisher ?? 'Outros'
     if (!acc[pub]) acc[pub] = []
     acc[pub].push(col)
@@ -77,7 +145,7 @@ export default function ColecaoPage() {
 
   const publishers = Object.keys(byPublisher).sort()
 
-  const totalValue = filteredHqs.reduce((s, c) => s + (c.current_value ?? 0), 0)
+  const totalValue = sortedHqs.reduce((s, c) => s + (c.current_value ?? 0), 0)
 
   return (
     <div className="space-y-5">
@@ -87,8 +155,8 @@ export default function ColecaoPage() {
           <h1 className="font-comic text-[1.8rem] leading-none uppercase tracking-[0.05em]">Coleção</h1>
           <p className="text-xs text-muted-foreground mt-1">
             {tab === 'colecoes'
-              ? `${filteredCols.length} coleção${filteredCols.length !== 1 ? 'ões' : ''}`
-              : `${filteredHqs.length} HQ${filteredHqs.length !== 1 ? 's' : ''} · ${formatCurrency(totalValue)}`}
+              ? `${sortedCols.length} coleção${sortedCols.length !== 1 ? 'ões' : ''}`
+              : `${sortedHqs.length} HQ${sortedHqs.length !== 1 ? 's' : ''} · ${formatCurrency(totalValue)}`}
           </p>
         </div>
         <div className="flex gap-2">
@@ -147,6 +215,34 @@ export default function ColecaoPage() {
             </button>
           ))}
         </div>
+        {/* Sort selector */}
+        <div className="flex items-center border-2 border-foreground/50 rounded-sm overflow-hidden">
+          <span className="px-2 text-muted-foreground border-r border-foreground/20">
+            <ArrowUpDown size={12} />
+          </span>
+          {tab === 'colecoes' ? (
+            <select
+              value={colSort}
+              onChange={(e) => setColSort(e.target.value as ColSort)}
+              className="bg-transparent text-xs font-medium px-2 py-1.5 outline-none cursor-pointer text-foreground"
+            >
+              {(Object.keys(COL_SORT_LABELS) as ColSort[]).map((k) => (
+                <option key={k} value={k}>{COL_SORT_LABELS[k]}</option>
+              ))}
+            </select>
+          ) : (
+            <select
+              value={hqSort}
+              onChange={(e) => setHqSort(e.target.value as HqSort)}
+              className="bg-transparent text-xs font-medium px-2 py-1.5 outline-none cursor-pointer text-foreground"
+            >
+              {(Object.keys(HQ_SORT_LABELS) as HqSort[]).map((k) => (
+                <option key={k} value={k}>{HQ_SORT_LABELS[k]}</option>
+              ))}
+            </select>
+          )}
+        </div>
+
         {tab === 'hqs' && (
           <div className="flex items-center border-2 border-foreground/50 rounded-sm overflow-hidden">
             <button onClick={() => setListView(false)} className={cn('p-1.5 transition-colors', !listView ? 'bg-foreground text-background' : 'text-muted-foreground')}>
@@ -218,15 +314,15 @@ export default function ColecaoPage() {
 
       {/* ── HQs tab ── */}
       {tab === 'hqs' && (
-        filteredHqs.length === 0 ? (
+        sortedHqs.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <p className="text-muted-foreground text-sm">Nenhum quadrinho encontrado.</p>
             <Link href="/colecao/novo" className={cn(buttonVariants({ variant: 'link', size: 'sm' }), 'mt-1')}>Adicionar →</Link>
           </div>
         ) : listView ? (
-          <HqListView comics={filteredHqs} />
+          <HqListView comics={sortedHqs} />
         ) : (
-          <HqGridView comics={filteredHqs} />
+          <HqGridView comics={sortedHqs} />
         )
       )}
     </div>
