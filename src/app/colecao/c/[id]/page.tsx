@@ -398,8 +398,9 @@ export default function CollectionDetailPage() {
     setCollection(prev => prev ? { ...prev, ...updates } : prev)
   }
 
-  const maxVol = allComics.length > 0 ? Math.max(...allComics.map(c => c.issue_number ?? c.volume ?? 0)) : 0
-  const vol = Array.from({ length: collection.total_volumes ?? maxVol }, (_, i) => i + 1)
+  const vol = collection.total_volumes
+    ? Array.from({ length: collection.total_volumes }, (_, i) => i + 1)
+    : Array.from(new Set(allComics.map(c => c.issue_number ?? c.volume).filter((n): n is number => n != null))).sort((a, b) => a - b)
 
   return (
     <>
