@@ -70,12 +70,44 @@ create table if not exists collections (
   description   text
 );
 
+create table if not exists app_settings (
+  key        text primary key,
+  value      text,
+  updated_at timestamptz default now() not null
+);
+
 -- ── Desabilitar RLS (app pessoal, 2 usuários) ─────────────────────
 alter table comics          disable row level security;
 alter table wishlist_items  disable row level security;
 alter table goals           disable row level security;
 alter table eventos         disable row level security;
 alter table collections     disable row level security;
+alter table app_settings    disable row level security;
+
+-- ══════════════════════════════════════════════════
+--  Storage — bucket público p/ assets (banner etc.)
+--  Rode este bloco no SQL Editor do Supabase
+-- ══════════════════════════════════════════════════
+insert into storage.buckets (id, name, public)
+values ('assets', 'assets', true)
+on conflict (id) do update set public = true;
+
+-- Liberar leitura/escrita pública no bucket "assets" (app pessoal)
+drop policy if exists "assets public read"   on storage.objects;
+drop policy if exists "assets public write"  on storage.objects;
+drop policy if exists "assets public update" on storage.objects;
+
+create policy "assets public read"
+  on storage.objects for select
+  using (bucket_id = 'assets');
+
+create policy "assets public write"
+  on storage.objects for insert
+  with check (bucket_id = 'assets');
+
+create policy "assets public update"
+  on storage.objects for update
+  using (bucket_id = 'assets');
 
 -- ══════════════════════════════════════════════════
 --  Usuários de autenticação (fazer no dashboard):

@@ -123,3 +123,36 @@ export async function deleteCollection(id: string): Promise<void> {
   const { error } = await supabase.from('collections').delete().eq('id', id)
   if (error) throw error
 }
+
+// ─── App settings (chave/valor) ──────────────────────────────────
+export async function getSetting(key: string): Promise<string | null> {
+  const { data } = await supabase.from('app_settings').select('value').eq('key', key).maybeSingle()
+  return data?.value ?? null
+}
+
+export async function setSetting(key: string, value: string): Promise<void> {
+  const { error } = await supabase
+    .from('app_settings')
+    .upsert({ key, value, updated_at: new Date().toISOString() })
+  if (error) throw error
+}
+
+// ─── Banner (por usuário) ────────────────────────────────────────
+type User = 'marcelo' | 'walter'
+const bannerKey = (user: User) => `banner_url_${user}`
+
+export async function getBannerUrl(user: User): Promise<string | null> {
+  return getSetting(bannerKey(user))
+}
+
+export async function uploadBanner(user: User, file: File): Promise<string> {
+  const ext  = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  const path = `banner-${user}-${Date.now()}.${ext}`
+  const { error } = await supabase.storage
+    .from('assets')
+    .upload(path, file, { upsert: true, contentType: file.type })
+  if (error) throw error
+  const { data } = supabase.storage.from('assets').getPublicUrl(path)
+  await setSetting(bannerKey(user), data.publicUrl)
+  return data.publicUrl
+}

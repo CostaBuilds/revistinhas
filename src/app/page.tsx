@@ -1,16 +1,16 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   ChevronLeft, ChevronRight,
   Package, ShoppingCart, Percent,
   BarChart3, BookMarked, Target, Clock, Building2, CalendarDays,
-  Library, DollarSign, TrendingUp, Bookmark, type LucideIcon,
+  Library, DollarSign, TrendingUp, Bookmark, ImagePlus, Loader2, type LucideIcon,
 } from 'lucide-react'
 import { pubData } from '@/lib/publishers'
 import PublisherLogo from '@/components/PublisherLogo'
 import StatsCard from '@/components/StatsCard'
-import { getComicsForUser, getWishlist, getGoals, getEventos, getCollections } from '@/lib/data'
+import { getComicsForUser, getWishlist, getGoals, getEventos, getCollections, getBannerUrl, uploadBanner } from '@/lib/data'
 import { useAuth } from '@/context/auth'
 import { Comic, WishlistItem, Goal, Evento, Collection } from '@/types'
 import { formatCurrency, ownerColor, cn } from '@/lib/utils'
@@ -640,6 +640,12 @@ export default function DashboardPage() {
   const [eventos,     setEventos]     = useState<Evento[]>([])
   const [collections, setCollections] = useState<Collection[]>([])
 
+  const [bannerUrl,    setBannerUrl]    = useState<string | null>(null)
+  const [bannerLoaded, setBannerLoaded] = useState(false)
+  const [uploading,    setUploading]    = useState(false)
+  const [bannerError,  setBannerError]  = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   useEffect(() => {
     if (!user) return
     getComicsForUser(user).then(setComics)
@@ -647,7 +653,29 @@ export default function DashboardPage() {
     getGoals().then((all)        => setGoals(all.filter(g => g.owner === user || g.owner === 'ambos')))
     getEventos().then(setEventos)
     getCollections().then(setCollections)
+    getBannerUrl(user).then(setBannerUrl).finally(() => setBannerLoaded(true))
   }, [user])
+
+  async function handleBannerFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file || !user) return
+    if (!file.type.startsWith('image/')) {
+      setBannerError('Selecione um arquivo de imagem.')
+      return
+    }
+    setBannerError(null)
+    setUploading(true)
+    try {
+      const url = await uploadBanner(user, file)
+      setBannerUrl(url)
+    } catch (err) {
+      console.error(err)
+      setBannerError('Falha ao subir a imagem.')
+    } finally {
+      setUploading(false)
+    }
+  }
 
   const totalValue = comics.reduce((s, c) => s + (c.current_value ?? 0), 0)
   const totalPaid  = comics.reduce((s, c) => {
@@ -685,13 +713,42 @@ export default function DashboardPage() {
         }}
       >
         <img
-          src="/banner.jpg"
+          src={bannerUrl ?? '/banner.jpg'}
           alt="Banner"
           className="absolute inset-0 w-full h-full object-cover object-center"
           onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
         />
         {/* Left accent bar — above image */}
         <div className="absolute left-0 inset-y-0 w-1.5 z-10" style={{ background: 'oklch(0.82 0.185 93)' }} />
+
+        {/* Upload control */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleBannerFile}
+        />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading || !bannerLoaded}
+          title="Trocar banner"
+          className="absolute right-2 bottom-2 z-20 flex items-center gap-1.5 rounded-sm border border-foreground/30 bg-black/55 px-2.5 py-1.5 text-white backdrop-blur-sm transition-colors hover:bg-black/75 disabled:opacity-60"
+        >
+          {uploading
+            ? <Loader2 size={13} className="animate-spin" />
+            : <ImagePlus size={13} />}
+          <span className="font-comic text-[10px] uppercase tracking-[0.15em]">
+            {uploading ? 'Enviando…' : 'Trocar banner'}
+          </span>
+        </button>
+
+        {bannerError && (
+          <p className="absolute left-3 bottom-2 z-20 rounded-sm bg-red-600/90 px-2 py-1 text-[10px] font-medium text-white">
+            {bannerError}
+          </p>
+        )}
       </div>
 
       {/* Stats row */}
