@@ -4,7 +4,7 @@
     {
       "name": "revistinhas",
       "runtimeExecutable": "/Users/marcelo/.nvm/versions/node/v20.20.2/bin/node",
-      "runtimeArgs": ["/Users/marcelo/Documents/codes/revistinhas/node_modules/.bin/next", "dev", "--turbopack"],
+      "runtimeArgs": ["/Users/marcelo/Developer/revistinhas/node_modules/.bin/next", "dev", "--turbopack"],
       "env": {
         "PATH": "/Users/marcelo/.nvm/versions/node/v20.20.2/bin:/usr/local/bin:/usr/bin:/bin",
         "NODE": "/Users/marcelo/.nvm/versions/node/v20.20.2/bin/node"

@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Sparkles, Bell, LogOut, Menu, Search, Moon, Sun } from 'lucide-react'
+import { Bell, LogOut, Menu, Search, Moon, Sun } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 import { buttonVariants } from '@/components/ui/button'
@@ -66,90 +66,91 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     <div className="flex flex-col h-screen bg-background">
 
       {/* ── Navbar ── */}
-      <header className="sticky top-0 z-40 bg-card border-b-[3px] border-foreground/80 shrink-0">
-        <div className="flex h-[60px] items-stretch">
+      <header className="sticky top-0 z-40 shrink-0 border-b border-border/60 bg-card/70 backdrop-blur-xl supports-[backdrop-filter]:bg-card/60">
+        <div className="flex h-16 items-center gap-2 px-3 md:px-5">
 
-          {/* Logo block — red corner box */}
+          {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2.5 px-4 shrink-0 bg-primary border-r-[3px] border-foreground/80 hover:opacity-90 transition-opacity"
+            className="flex items-center shrink-0 mr-1 transition-opacity hover:opacity-80"
           >
-            <Sparkles size={14} className="text-primary-foreground" />
-            <span className="font-comic text-[18px] tracking-[0.12em] text-primary-foreground uppercase">
-              Revistinhas
-            </span>
+            <img src="/logo.png" alt="Revistinhas" className="h-9 w-auto" />
           </Link>
 
-          {/* Desktop nav tabs */}
-          <nav className="hidden md:flex items-stretch flex-1 px-2">
+          {/* Desktop nav tabs (pills) */}
+          <nav className="hidden md:flex items-center gap-1">
             {nav.map(({ href, label }) => {
               const active = href === '/' ? pathname === '/' : pathname.startsWith(href)
               return (
-                <Link key={href} href={href} className="flex items-stretch">
-                  <span className={cn(
-                    'flex items-center px-4 font-comic text-[13px] tracking-[0.1em] uppercase transition-all duration-150 select-none border-b-[3px]',
+                <Link
+                  key={href}
+                  href={href}
+                  className={cn(
+                    'rounded-full px-3.5 py-1.5 font-comic text-[12.5px] uppercase tracking-[0.08em] transition-colors select-none',
                     active
-                      ? 'text-primary border-primary'
-                      : 'text-muted-foreground hover:text-foreground border-transparent hover:border-foreground/25'
-                  )}>
-                    {label}
-                  </span>
+                      ? 'bg-primary/12 text-primary'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/70'
+                  )}
+                >
+                  {label}
                 </Link>
               )
             })}
           </nav>
 
           {/* Right action group */}
-          <div className="ml-auto flex items-center gap-1 px-3 border-l-[3px] border-foreground/80">
+          <div className="ml-auto flex items-center gap-1">
 
             {/* Search */}
-            <button className="h-8 w-8 rounded-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors">
-              <Search size={14} />
+            <button className="h-9 w-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-colors">
+              <Search size={16} />
             </button>
 
             {/* Theme toggle */}
             <button
               onClick={toggleTheme}
               title={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
-              className="h-8 w-8 rounded-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
+              className="h-9 w-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-colors"
             >
-              {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
             </button>
 
             {/* Bell + badge */}
-            <button className="relative h-8 w-8 rounded-sm flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors">
-              <Bell size={14} />
+            <button className="relative h-9 w-9 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-colors">
+              <Bell size={16} />
               {eventCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 min-w-[14px] h-3.5 rounded-sm bg-primary text-[8px] font-bold text-primary-foreground flex items-center justify-center px-0.5 leading-none border border-card">
+                <span className="absolute top-1 right-1 min-w-[15px] h-[15px] rounded-full bg-primary text-[8px] font-bold text-primary-foreground flex items-center justify-center px-1 leading-none ring-2 ring-card">
                   {eventCount > 9 ? '9+' : eventCount}
                 </span>
               )}
             </button>
 
             {/* Divider */}
-            <div className="h-6 w-[2px] bg-foreground/20 mx-1" />
+            <div className="h-5 w-px bg-border mx-1.5" />
 
             {/* User */}
             {user && (
               <div className="flex items-center gap-2.5">
-                <div
-                  className="h-8 w-8 rounded-sm flex items-center justify-center text-[13px] font-black text-white border-2 border-foreground/70 shrink-0"
-                  style={{ background: userColor }}
-                >
-                  {user[0].toUpperCase()}
-                </div>
-                <div className="hidden lg:block leading-none">
-                  <p className="font-comic text-[14px] uppercase tracking-[0.08em]" style={{ color: userColor }}>
-                    {user}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">colecionador</p>
-                </div>
                 <button
                   onClick={handleLogout}
                   title="Sair"
-                  className="text-muted-foreground hover:text-foreground transition-colors p-1.5 rounded-sm hover:bg-muted/60"
+                  className="group flex items-center gap-2 rounded-full py-1 pl-1 pr-1 lg:pr-3 hover:bg-muted/70 transition-colors"
                 >
-                  <LogOut size={13} />
+                  <span
+                    className="h-8 w-8 rounded-full flex items-center justify-center text-[13px] font-black text-white shrink-0 ring-2 ring-card"
+                    style={{ background: userColor }}
+                  >
+                    {user[0].toUpperCase()}
+                  </span>
+                  <span className="hidden lg:block leading-none text-left">
+                    <span className="block font-comic text-[13px] uppercase tracking-[0.08em]" style={{ color: userColor }}>
+                      {user}
+                    </span>
+                    <span className="block text-[10px] text-muted-foreground mt-0.5 group-hover:hidden">colecionador</span>
+                    <span className="hidden text-[10px] text-muted-foreground mt-0.5 group-hover:flex items-center gap-1">
+                      <LogOut size={9} /> sair
+                    </span>
+                  </span>
                 </button>
               </div>
             )}
@@ -157,26 +158,25 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             {/* Mobile hamburger */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger className={cn(
-                buttonVariants({ variant: 'outline', size: 'icon' }),
-                'h-8 w-8 md:hidden shrink-0 ml-1 rounded-sm border-2 border-foreground/60'
+                buttonVariants({ variant: 'ghost', size: 'icon' }),
+                'h-9 w-9 md:hidden shrink-0 ml-1 rounded-full'
               )}>
-                <Menu size={14} />
+                <Menu size={16} />
               </SheetTrigger>
-              <SheetContent side="left" className="w-56 p-0 rounded-none border-r-2 border-foreground/60">
-                <div className="flex items-center gap-2 px-4 py-3 border-b-2 border-foreground/60 bg-primary">
-                  <Sparkles size={13} className="text-primary-foreground" />
-                  <span className="font-comic text-sm tracking-[0.1em] text-primary-foreground uppercase">Revistinhas</span>
+              <SheetContent side="left" className="w-60 p-0 border-r border-border">
+                <div className="flex items-center px-4 py-4 border-b border-border">
+                  <img src="/logo.png" alt="Revistinhas" className="h-8 w-auto" />
                 </div>
-                <nav className="p-2 space-y-0.5">
+                <nav className="p-2 space-y-1">
                   {nav.map(({ href, label }) => {
                     const active = href === '/' ? pathname === '/' : pathname.startsWith(href)
                     return (
                       <Link key={href} href={href} onClick={() => setMobileOpen(false)}>
                         <span className={cn(
-                          'flex items-center rounded-sm px-3 py-2.5 font-comic text-sm uppercase tracking-wider transition-colors border-l-4',
+                          'flex items-center rounded-xl px-3 py-2.5 font-comic text-sm uppercase tracking-wider transition-colors',
                           active
-                            ? 'bg-primary/10 text-primary border-primary'
-                            : 'text-muted-foreground hover:text-foreground hover:bg-muted border-transparent'
+                            ? 'bg-primary/12 text-primary'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                         )}>
                           {label}
                         </span>
@@ -185,10 +185,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   })}
                 </nav>
                 {user && (
-                  <div className="absolute bottom-0 left-0 right-0 p-3 border-t-2 border-foreground/40">
-                    <div className="flex items-center gap-2">
+                  <div className="absolute bottom-0 left-0 right-0 p-3 border-t border-border">
+                    <div className="flex items-center gap-2.5">
                       <div
-                        className="h-7 w-7 rounded-sm flex items-center justify-center text-xs font-black text-white border-2 border-foreground/60"
+                        className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-black text-white ring-2 ring-card shrink-0"
                         style={{ background: userColor }}
                       >
                         {user[0].toUpperCase()}
@@ -196,8 +196,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                       <p className="font-comic text-sm uppercase tracking-wider flex-1" style={{ color: userColor }}>
                         {user}
                       </p>
-                      <button onClick={handleLogout} className="text-muted-foreground hover:text-foreground p-1">
-                        <LogOut size={13} />
+                      <button onClick={handleLogout} title="Sair" className="text-muted-foreground hover:text-foreground p-1.5 rounded-full hover:bg-muted transition-colors">
+                        <LogOut size={14} />
                       </button>
                     </div>
                   </div>
