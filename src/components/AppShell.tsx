@@ -74,7 +74,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             href="/"
             className="flex items-center shrink-0 mr-1 transition-opacity hover:opacity-80"
           >
-            <img src="/logo.png" alt="Revistinhas" className="h-9 w-auto" />
+            <img src="/logo.png" alt="Revistinhas" className="h-11 w-auto" />
           </Link>
 
           {/* Desktop nav tabs (pills) */}
@@ -165,7 +165,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               </SheetTrigger>
               <SheetContent side="left" className="w-60 p-0 border-r border-border">
                 <div className="flex items-center px-4 py-4 border-b border-border">
-                  <img src="/logo.png" alt="Revistinhas" className="h-8 w-auto" />
+                  <img src="/logo.png" alt="Revistinhas" className="h-10 w-auto" />
                 </div>
                 <nav className="p-2 space-y-1">
                   {nav.map(({ href, label }) => {

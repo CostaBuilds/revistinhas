@@ -789,11 +789,11 @@ export default function DashboardPage() {
         <div className="xl:col-span-4 flex flex-col gap-3">
           <ValueBreakdownCard comics={comics} />
           <RecentComicsCard comics={recentComics} user={user!} />
-          <PublisherCollectionCard comics={comics} />
         </div>
         <div className="xl:col-span-5 flex flex-col gap-3">
           <FeaturedComicCard comic={recentComics[0] ?? null} user={user!} />
           <SagaCarouselCard sagas={sagas} />
+          <PublisherCollectionCard comics={comics} />
           <GoalsCard goals={goals} />
         </div>
         <div className="xl:col-span-3">
