@@ -140,7 +140,7 @@ export default function ColecaoPage() {
           <h1 className="font-comic text-[1.8rem] leading-none uppercase tracking-[0.05em]">Coleção</h1>
           <p className="text-xs text-muted-foreground mt-1">
             {tab === 'colecoes'
-              ? `${sortedCols.length} coleção${sortedCols.length !== 1 ? 'ões' : ''}`
+              ? `${sortedCols.length} ${sortedCols.length !== 1 ? 'coleções' : 'coleção'}`
               : `${sortedHqs.length} HQ${sortedHqs.length !== 1 ? 's' : ''} · ${formatCurrency(totalValue)}`}
           </p>
         </div>
@@ -265,7 +265,7 @@ export default function ColecaoPage() {
                     <PublisherLogo publisher={pub} size={14} inverted />
                     <span className="font-comic text-sm uppercase tracking-[0.18em] text-white">{pub}</span>
                     <span className="font-comic text-[10px] text-white/70 tracking-wider">
-                      {cols.length} coleção{cols.length !== 1 ? 'ões' : ''}
+                      {cols.length} {cols.length !== 1 ? 'coleções' : 'coleção'}
                     </span>
                   </div>
                   <Link
